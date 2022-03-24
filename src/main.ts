@@ -30,7 +30,7 @@ async function main() {
   }
   console.log(`Found a total of ${web3Names.length} web3 name${web3Names.length > 1 ? "s" : ""} to claim.`)
 
-  const generatedValues: {web3Name, did, seed}[] = []
+  const generatedValues: {web3Name: string, did: string, seed: string}[] = []
   const txs: Kilt.SubmittableExtrinsic[] = []
 
   console.log("**********")
