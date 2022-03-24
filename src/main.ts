@@ -58,14 +58,14 @@ async function main() {
   console.log(`KILT account where all the funds will be coming from: ${fundsAccount.address}`)
 
   const web3Names: string[] = await readFile("res/web3names.json", { encoding: "utf-8" }).then((c) => JSON.parse(c))
-  console.log(`Found a total of "${web3Names.length}" web3 names to claim.`)
+  console.log(`Found a total of ${web3Names.length} web3 name${web3Names.length > 1 ? "s" : ""} to claim.`)
   
   const generatedValues: [string, string, string][] = []  // [web3name, did, seed]
   
   console.log("**********")
   for (const [index, name] of web3Names.entries()) {
     console.log(`****Processing name #${index+1} "${name}"...`)
-    const finalSeed = `${fundsMnemonic}//did//${name}`
+    const finalSeed = `${fundsMnemonic}//${name}`
     const fullDid = await createDid(keystore, fundsAccount.address, finalSeed, async (tx) => {
       await Kilt.BlockchainUtils.signAndSubmitTx(tx, fundsAccount, {
         resolveOn: Kilt.BlockchainUtils.IS_IN_BLOCK
