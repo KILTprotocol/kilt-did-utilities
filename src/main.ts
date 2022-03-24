@@ -30,7 +30,7 @@ async function main() {
   }
   console.log(`Found a total of ${web3Names.length} web3 name${web3Names.length > 1 ? "s" : ""} to claim.`)
 
-  const generatedValues: {web3Name: string, did: string, seed: string}[] = []
+  const generatedValues: {web3Name: string, did: string, seed: string, keyType: string}[] = []
   const txs: Kilt.SubmittableExtrinsic[] = []
 
   console.log("**********")
@@ -57,7 +57,7 @@ async function main() {
     })
     console.log(`****Full DID generated for "${name}". Authentication key seed: ${finalSeed} - DID: ${fullDid.did}.`)
     const claimTx = await Kilt.Did.Web3Names.getClaimTx(name).then((tx) => fullDid.authorizeExtrinsic(tx, keystore, fundsAccount.address))
-    generatedValues.push({web3Name: name, did: fullDid.did, seed: finalSeed})
+    generatedValues.push({web3Name: name, did: fullDid.did, seed: finalSeed, keyType: authKey.type})
     txs.push(...[fullDidCreationTx, claimTx])
     console.log(`****Process complete for "${name}"`)
   }
@@ -65,7 +65,14 @@ async function main() {
 
   // Batch all txs together, and submit with the submitter account
   const batchedTxs = await api.tx.utility.batchAll(txs)
-  await Kilt.BlockchainUtils.signAndSubmitTx(batchedTxs, fundsAccount)
+  if (process.env.SUBMIT_RESULT === 'true') {
+    console.log('Submitting tx...')
+    await Kilt.BlockchainUtils.signAndSubmitTx(batchedTxs, fundsAccount)
+    console.log('Tx submitted!')
+  } else {
+    const encodedTx = batchedTxs.toHex()
+    console.log(`Tx hex: ${encodedTx}`)
+  }
 
   await utils.writeOutput(generatedValues)
 }
