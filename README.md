@@ -10,9 +10,9 @@ Setup the script by declaring the following env variables:
 
 Set the web3 names that the script should generate in `res/web3names.json`.
 
-## Run
+## Run the web3 name claiming
 
-Run `yarn start` from the project root. At the end, the `out/result.json` file will contain the result of the operation. It is a new JSON file where each entry has the following structure:
+Run `yarn run web3-claim` from the project root. At the end, the `out/result.json` file will contain the result of the operation. It is a new JSON file where each entry has the following structure:
 
 ```json
 {
@@ -22,3 +22,7 @@ Run `yarn start` from the project root. At the end, the `out/result.json` file w
     "keyType": "<did_key_type>"
   }
 ```
+
+## Run the web3 name releasing with the generated DID
+
+Specify a new env variable, in addition to the ones above: `DID_SEED`, which should contain the seed to re-create the DID authentication key. After that, run `yarn run web3-release`.
