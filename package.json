@@ -2,8 +2,8 @@
   "name": "web3name-claiming-script",
   "license": "MIT",
   "scripts": {
-    "web3-claim": "ts-node src/web3-claim.ts",
-    "web3-release": "ts-node src/web3-release.ts"
+    "claim": "ts-node src/web3-claim.ts",
+    "release": "ts-node src/web3-release.ts"
   },
   "dependencies": {
     "@kiltprotocol/sdk-js": "^0.26.0",

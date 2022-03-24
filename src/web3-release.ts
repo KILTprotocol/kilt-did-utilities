@@ -34,7 +34,7 @@ async function main() {
 
   const releaseWeb3NameTx = await Kilt.Did.Web3Names.getReleaseByOwnerTx().then((tx) => fullDidDetails!.authorizeExtrinsic(tx, keystore, fundsAccount.address))
 
-  if (process.env.SUBMIT_RESULT === 'true') {
+  if (process.env.SUBMIT_RESULT?.toLowerCase() === 'true') {
     console.log('Submitting tx...')
     await Kilt.BlockchainUtils.signAndSubmitTx(releaseWeb3NameTx, fundsAccount)
     console.log('Tx submitted!')

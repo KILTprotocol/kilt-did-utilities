@@ -64,8 +64,8 @@ async function main() {
   console.log("**********")
 
   // Batch all txs together, and submit with the submitter account
-  const batchedTxs = await api.tx.utility.batchAll(txs)
-  if (process.env.SUBMIT_RESULT === 'true') {
+  const batchedTxs = txs.length > 1 ? await api.tx.utility.batchAll(txs) : txs.pop()!
+  if (process.env.SUBMIT_RESULT?.toLowerCase() === 'true') {
     console.log('Submitting tx...')
     await Kilt.BlockchainUtils.signAndSubmitTx(batchedTxs, fundsAccount)
     console.log('Tx submitted!')
