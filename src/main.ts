@@ -1,50 +1,13 @@
-import { readFile, writeFile, mkdir } from "fs/promises"
-import { existsSync } from "fs"
-
-import { config as envConfig } from "dotenv"
+import { readFile } from "fs/promises"
 
 import { Keyring } from "@polkadot/keyring"
-import { hexToU8a } from "@polkadot/util"
+import { encodeAddress } from "@polkadot/util-crypto"
 import * as Kilt from "@kiltprotocol/sdk-js"
-import { SubmittableExtrinsic } from "@kiltprotocol/sdk-js"
-import { ApiPromise } from "@polkadot/api"
 
-let api: ApiPromise
-
-async function config() {
-  envConfig()
-
-  let wsEndpoint = process.env.WS_ENDPOINT
-  if (!wsEndpoint) {
-    const defaultEndpoint = "wss://spiritnet.kilt.io"
-    console.warn(`No env variable WS_ENDPOINT specified. Using the default "${defaultEndpoint}"`)
-    wsEndpoint = defaultEndpoint
-  }
-
-  await Kilt.init({ address: wsEndpoint })
-  ;({ api } = await Kilt.connect())
-}
-
-async function createDid(keystore: Kilt.Did.DemoKeystore, submitterAccount: string, seed: string, submitPromise: (ext: SubmittableExtrinsic) => Promise<void>): Promise<Kilt.Did.FullDidDetails> {
-  const authKey: Kilt.NewDidVerificationKey = await keystore.generateKeypair({ alg: Kilt.Did.SigningAlgorithms.Sr25519, seed }).then((k) => {
-    return {
-      publicKey: k.publicKey,
-      type: Kilt.VerificationKeyType.Sr25519
-    }
-  })
-  return new Kilt.Did.FullDidCreationBuilder(api, authKey).consumeWithHandler(keystore, submitterAccount, submitPromise)
-}
-
-async function writeOutput(value: any) {
-  if (!existsSync("out")) {
-    await mkdir("out")
-  }
-
-  await writeFile("out/result.json", JSON.stringify(value, undefined, 2))
-}
+import * as utils from "./utils"
 
 async function main() {
-  await config()
+  const { api } = await utils.config()
 
   const keyring = new Keyring({ ss58Format: 38, type: "sr25519" })
   const keystore = new Kilt.Did.DemoKeystore()
@@ -55,42 +18,56 @@ async function main() {
   }
 
   const fundsAccount = keyring.addFromMnemonic(fundsMnemonic)
-  console.log(`KILT account where all the funds will be coming from: ${fundsAccount.address}`)
+  console.log(`KILT account which will pay for all the deposits: ${fundsAccount.address}`)
 
-  const web3Names: string[] = await readFile("res/web3names.json", { encoding: "utf-8" }).then((c) => JSON.parse(c))
+  const web3Names: string[] = await readFile("res/web3names.json", { encoding: "utf-8" }).then((c) => JSON.parse(c)).catch((e) => {
+    console.error('Please add the web3 names to "res/web3names.json"')
+    process.exit(1)
+  })
+  if (!web3Names.length) {
+    console.log('No web3 name found. Exiting.')
+    process.exit(0)
+  }
   console.log(`Found a total of ${web3Names.length} web3 name${web3Names.length > 1 ? "s" : ""} to claim.`)
-  
-  const generatedValues: [string, string, string][] = []  // [web3name, did, seed]
-  
+
+  const generatedValues: {web3Name, did, seed}[] = []
+  const txs: Kilt.SubmittableExtrinsic[] = []
+
   console.log("**********")
   for (const [index, name] of web3Names.entries()) {
-    console.log(`****Processing name #${index+1} "${name}"...`)
+    console.log(`****Processing name #${index + 1} "${name}"...`)
     const finalSeed = `${fundsMnemonic}//${name}`
-    const fullDid = await createDid(keystore, fundsAccount.address, finalSeed, async (tx) => {
-      await Kilt.BlockchainUtils.signAndSubmitTx(tx, fundsAccount, {
-        resolveOn: Kilt.BlockchainUtils.IS_IN_BLOCK
-      })
+    const authKey: Kilt.NewDidVerificationKey = await keystore.generateKeypair({ alg: Kilt.Did.SigningAlgorithms.Sr25519, seed: finalSeed }).then((k) => {
+      return {
+        publicKey: k.publicKey,
+        type: Kilt.VerificationKeyType.Sr25519
+      }
     })
-    console.log(`********Full DID created for "${name}". Authentication key seed: ${finalSeed} - DID: ${fullDid.did}.`)
-    console.log("********Submitting web3 name claim tx...")
+    // Creating the full DID even though it is not written on chain, to sign the web3 name claim extrinsic.
+    const chainEncodedAuthKey = utils.encodeToChainKey(api, authKey)
+    const authKeyId = utils.computeChainKeyId(chainEncodedAuthKey)
+    const fullDidIdentifier = encodeAddress(authKey.publicKey, 38)
+    const fullDidCreationTx = await new Kilt.Did.FullDidCreationBuilder(api, authKey).consume(keystore, fundsAccount.address)
+    // Re-create full DID before the tx is submitted
+    const fullDid = new Kilt.Did.FullDidDetails({
+        identifier: fullDidIdentifier,
+        did: `did:kilt:${fullDidIdentifier}`,
+        keyRelationships: { authentication: new Set([authKeyId]) },
+        keys: { [authKeyId]: authKey }
+    })
+    console.log(`****Full DID generated for "${name}". Authentication key seed: ${finalSeed} - DID: ${fullDid.did}.`)
     const claimTx = await Kilt.Did.Web3Names.getClaimTx(name).then((tx) => fullDid.authorizeExtrinsic(tx, keystore, fundsAccount.address))
-    await Kilt.BlockchainUtils.signAndSubmitTx(claimTx, fundsAccount, {
-      resolveOn: Kilt.BlockchainUtils.IS_IN_BLOCK
-    })
-    generatedValues.push([name, fullDid.did, finalSeed])
+    generatedValues.push({web3Name: name, did: fullDid.did, seed: finalSeed})
+    txs.push(...[fullDidCreationTx, claimTx])
     console.log(`****Process complete for "${name}"`)
   }
   console.log("**********")
 
-  const serializedValues = generatedValues.map(([web3Name, did, seed]) => {
-    return {
-      web3Name,
-      did,
-      seed,
-    }
-  })
+  // Batch all txs together, and submit with the submitter account
+  const batchedTxs = await api.tx.utility.batchAll(txs)
+  await Kilt.BlockchainUtils.signAndSubmitTx(batchedTxs, fundsAccount)
 
-  await writeOutput(serializedValues)
+  await utils.writeOutput(generatedValues)
 }
 
 main().catch((e) => console.error(e)).then(() => process.exit(0))
