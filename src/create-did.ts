@@ -15,8 +15,6 @@ async function main() {
     console.log('Mnemonic not specified. Generating a random one...')
     didMnemonic = mnemonicGenerate()
   }
-  const derivationPath = process.env.DERIVATION_PATH || ""
-  didMnemonic = `${didMnemonic}${derivationPath}`
   console.log(`DID mnemonic: ${didMnemonic}. Please save this somewhere safe.`)
 
   const keystore = new Kilt.Did.DemoKeystore()

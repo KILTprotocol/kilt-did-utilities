@@ -1,28 +1,34 @@
-# Web3 name claiming script
+# KILT DID utilities
 
-Setup the script by declaring the following env variables:
+Different scripts that can be used to perform different DID-related operations.
 
-- `FUNDS_MNEMONIC`: The mnemonic of the account that will be used to pay ALL the deposits of the DIDs and web3 names (checked with legal, this is ok). This is required.
-- `WS_ENDPOINT`: The RCP endpoint. This is optional and defaults to `wss://spiritnet.kilt.io`.
-- `SUBMIT_RESULT`: has a value of `'true'` to indicate the resulting tx be submitted by the script. Otherwise, and by default, only its HEX is printed.
+## Install dependencies
 
-## Setup
+Run `yarn install` from the project root.
 
-Set the web3 names that the script should generate in `res/web3names.json`.
+## Create a new DID
 
-## Run the web3 name claiming
+This script requires the following env variables:
 
-Run `yarn run claim` from the project root. At the end, the `out/result.json` file will contain the result of the operation. It is a new JSON file where each entry has the following structure:
+- `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
 
-```json
-{
-    "web3Name": "<claimed_web3_name>",
-    "did": "did:kilt:<generated_did>",
-    "seed": "<submitter_account_seed>//<claimed_web3_name>",
-    "keyType": "<did_key_type>"
-  }
-```
+The following optional env variables can be passed:
 
-## Run the web3 name releasing with the generated DID
+- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_MNEMONIC`: The mnemonic of the DID to create. including any derivation path. Defaults to a random one.
 
-Specify a new env variable, in addition to the ones above: `DID_SEED`, which should contain the seed to re-create the DID authentication key. After that, run `yarn run release`.
+To run this script, execute `yarn run create-did`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+
+## Claim a web3 name
+
+This script requires the following env variables:
+
+- `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
+- `DID_MNEMONIC`: The mnemonic of the DID to create. including any derivation path.
+- `WEB3_NAME`: The web3 name to claim.
+
+The following optional env variables can be passed:
+
+- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+
+To run this script, execute `yarn run create-did`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
