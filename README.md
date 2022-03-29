@@ -30,5 +30,20 @@ This script requires the following env variables:
 The following optional env variables can be passed:
 
 - `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `NONCE`: The nonce to use to sign the DID operation. Defaults to the one after the one currently on chain.
 
-To run this script, execute `yarn run create-did`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+To run this script, execute `yarn run claim-web3name`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+
+## DID-sign an encoded extrinsic with the authentication key
+
+This script requires the following env variables:
+
+- `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
+- `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**.
+
+The following optional env variables can be passed:
+
+- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `NONCE`: The nonce to use to sign the DID operation. Defaults to the one after the one currently on chain.
+
+To run this script, execute `yarn run auth-sign-tx`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.

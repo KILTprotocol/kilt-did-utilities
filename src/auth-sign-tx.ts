@@ -24,11 +24,6 @@ async function main() {
     }
   })
 
-  const web3Name = process.env.WEB3_NAME
-  if (!web3Name) {
-    throw `No WEB3_NAME env variable specified.`
-  }
-
   const chainEncodedAuthKey = utils.encodeToChainKey(api, authKey)
   const authKeyId = utils.computeChainKeyId(chainEncodedAuthKey)
   const fullDidIdentifier = encodeAddress(authKey.publicKey, 38)
@@ -41,9 +36,17 @@ async function main() {
   })
   const nonce: BN | undefined = process.env.NONCE ? new BN(process.env.NONCE) : undefined
   
-  const claimTx = await Kilt.Did.Web3Names.getClaimTx(web3Name).then((tx) => fullDid.authorizeExtrinsic(tx, keystore, submitterAddress, { txCounter: nonce }))
-  const encodedOperation = claimTx.toHex()
-  console.log(`Encoded web3 name claim operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  const encodedTx = process.env.ENCODED_TX
+  if (!encodedTx) {
+    throw `No ENCODED_TX env variable specified.`
+  }
+
+  const decodedCall = api.createType('Call', encodedTx)
+  const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
+  const extrinsic = api.tx[section][method](...decodedCall.args)
+  const signedExtrinsic = await fullDid.authorizeExtrinsic(extrinsic, keystore, submitterAddress, { txCounter: nonce })
+  const encodedOperation = signedExtrinsic.toHex()
+  console.log(`Encoded DID creation operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
 }
 
 main().catch((e) => console.error(e)).then(() => process.exit(0))

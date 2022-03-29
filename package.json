@@ -3,7 +3,8 @@
   "license": "MIT",
   "scripts": {
     "create-did": "ts-node src/create-did.ts",
-    "claim-web3name": "ts-node src/claim-web3name.ts"
+    "claim-web3name": "ts-node src/claim-web3name.ts",
+    "auth-sign-tx": "ts-node src/auth-sign-tx"
   },
   "dependencies": {
     "@kiltprotocol/sdk-js": "^0.26.0",
