@@ -40,6 +40,7 @@ This script requires the following env variables:
 
 - `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
 - `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**.
+- `ENCODED_TX`: The HEX-encoded extrinsic to DID-sign.
 
 The following optional env variables can be passed:
 
