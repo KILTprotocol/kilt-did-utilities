@@ -1,10 +1,7 @@
 import { config as envConfig } from "dotenv"
-import { existsSync } from "fs"
-import { writeFile, mkdir } from "fs/promises"
 
 import { ApiPromise } from "@polkadot/api"
 import * as Kilt from "@kiltprotocol/sdk-js"
-
 
 export async function config(): Promise<Kilt.ChainHelpers.Blockchain> {
   envConfig()
@@ -18,14 +15,6 @@ export async function config(): Promise<Kilt.ChainHelpers.Blockchain> {
 
   await Kilt.init({ address: wsEndpoint })
   return Kilt.connect()
-}
-
-export async function writeOutput(value: any) {
-  if (!existsSync("out")) {
-    await mkdir("out")
-  }
-
-  await writeFile("out/result.json", JSON.stringify(value, undefined, 2))
 }
 
 export function computeChainKeyId(publicKey: Kilt.Did.DidChain.ChainDidPublicKey): Kilt.DidKey['id'] {

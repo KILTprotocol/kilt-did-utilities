@@ -1,4 +1,4 @@
-import { encodeAddress, mnemonicGenerate } from "@polkadot/util-crypto"
+import { mnemonicGenerate } from "@polkadot/util-crypto"
 import * as Kilt from "@kiltprotocol/sdk-js"
 
 import * as utils from "./utils"
