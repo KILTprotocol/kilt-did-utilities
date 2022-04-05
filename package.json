@@ -2,12 +2,14 @@
   "name": "kilt-did-utilities",
   "license": "MIT",
   "scripts": {
+    "auth-sign-tx": "ts-node src/auth-sign-tx",
     "create-did": "ts-node src/create-did.ts",
     "claim-web3name": "ts-node src/claim-web3name.ts",
-    "auth-sign-tx": "ts-node src/auth-sign-tx"
+    "link-account": "ts-node src/link-account.ts",
+    "unlink-account": "ts-node src/unlink-account.ts"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "^0.26.0",
+    "@kiltprotocol/sdk-js": "0.27.0-beta.1",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
