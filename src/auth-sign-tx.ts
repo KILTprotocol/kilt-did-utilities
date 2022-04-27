@@ -46,7 +46,7 @@ async function main() {
   const extrinsic = api.tx[section][method](...decodedCall.args)
   const signedExtrinsic = await fullDid.authorizeExtrinsic(extrinsic, keystore, submitterAddress, { txCounter: nonce })
   const encodedOperation = signedExtrinsic.toHex()
-  console.log(`Encoded DID creation operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(`Encoded DID creation operation: '${encodedOperation}'. Please submit this via PolkadotJS with the account provided here.`)
 }
 
 main().catch((e) => console.error(e)).then(() => process.exit(0))

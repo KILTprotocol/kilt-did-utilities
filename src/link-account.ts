@@ -38,7 +38,7 @@ async function main() {
   
   const claimTx = await Kilt.Did.AccountLinks.getAssociateSenderTx().then((tx) => fullDid.authorizeExtrinsic(tx, keystore, submitterAddress, { txCounter: nonce }))
   const encodedOperation = claimTx.toHex()
-  console.log(`Encoded account linking operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(`Encoded account linking operation: '${encodedOperation}'. Please submit this via PolkadotJS with the account provided here.`)
 }
 
 main().catch((e) => console.error(e)).then(() => process.exit(0))

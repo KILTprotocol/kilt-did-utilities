@@ -43,7 +43,7 @@ async function main() {
   
   const claimTx = await Kilt.Did.Web3Names.getClaimTx(web3Name).then((tx) => fullDid.authorizeExtrinsic(tx, keystore, submitterAddress, { txCounter: nonce }))
   const encodedOperation = claimTx.toHex()
-  console.log(`Encoded web3 name claim operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(`Encoded web3 name claim operation: '${encodedOperation}'. Please submit this via PolkadotJS with the account provided here.`)
 }
 
 main().catch((e) => console.error(e)).then(() => process.exit(0))
