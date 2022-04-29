@@ -1,8 +1,8 @@
-import { encodeAddress } from "@polkadot/util-crypto"
-import { BN } from "@polkadot/util"
-import * as Kilt from "@kiltprotocol/sdk-js"
+import { encodeAddress } from '@polkadot/util-crypto'
+import { BN } from '@polkadot/util'
+import * as Kilt from '@kiltprotocol/sdk-js'
 
-import * as utils from "./utils"
+import * as utils from './utils'
 
 async function main() {
   const { api } = await utils.config()
@@ -17,12 +17,17 @@ async function main() {
   }
 
   const keystore = new Kilt.Did.DemoKeystore()
-  const authKey: Kilt.NewDidVerificationKey = await keystore.generateKeypair({ alg: Kilt.Did.SigningAlgorithms.Sr25519, seed: didMnemonic }).then((k) => {
-    return {
-      publicKey: k.publicKey,
-      type: Kilt.VerificationKeyType.Sr25519
-    }
-  })
+  const authKey: Kilt.NewDidVerificationKey = await keystore
+    .generateKeypair({
+      alg: Kilt.Did.SigningAlgorithms.Sr25519,
+      seed: didMnemonic,
+    })
+    .then((k) => {
+      return {
+        publicKey: k.publicKey,
+        type: Kilt.VerificationKeyType.Sr25519,
+      }
+    })
 
   const chainEncodedAuthKey = utils.encodeToChainKey(api, authKey)
   const authKeyId = utils.computeChainKeyId(chainEncodedAuthKey)
@@ -32,13 +37,24 @@ async function main() {
     identifier: fullDidIdentifier,
     did: `did:kilt:${fullDidIdentifier}`,
     keyRelationships: { authentication: new Set([authKeyId]) },
-    keys: { [authKeyId]: authKey }
+    keys: { [authKeyId]: authKey },
   })
-  const nonce: BN | undefined = process.env.NONCE ? new BN(process.env.NONCE) : undefined
-  
-  const claimTx = await Kilt.Did.AccountLinks.getAssociateSenderTx().then((tx) => fullDid.authorizeExtrinsic(tx, keystore, submitterAddress, { txCounter: nonce }))
+  const nonce: BN | undefined = process.env.NONCE
+    ? new BN(process.env.NONCE)
+    : undefined
+
+  const claimTx = await Kilt.Did.AccountLinks.getAssociateSenderTx().then(
+    (tx) =>
+      fullDid.authorizeExtrinsic(tx, keystore, submitterAddress, {
+        txCounter: nonce,
+      })
+  )
   const encodedOperation = claimTx.toHex()
-  console.log(`Encoded account linking operation: '${encodedOperation}'. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(
+    `Encoded account linking operation: '${encodedOperation}'. Please submit this via PolkadotJS with the account provided here.`
+  )
 }
 
-main().catch((e) => console.error(e)).then(() => process.exit(0))
+main()
+  .catch((e) => console.error(e))
+  .then(() => process.exit(0))
