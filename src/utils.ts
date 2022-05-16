@@ -1,10 +1,8 @@
-import { config as envConfig } from 'dotenv'
-
+import 'dotenv/config'
 import { ApiPromise } from '@polkadot/api'
 import * as Kilt from '@kiltprotocol/sdk-js'
 
 export async function config(): Promise<Kilt.ChainHelpers.Blockchain> {
-  envConfig()
 
   let wsEndpoint = process.env.WS_ENDPOINT
   if (!wsEndpoint) {
