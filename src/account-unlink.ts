@@ -4,10 +4,12 @@ import * as Kilt from '@kiltprotocol/sdk-js'
 
 import { Keyring } from '@polkadot/api'
 import { KeyringPair } from '@kiltprotocol/sdk-js'
+import { config } from 'dotenv'
 
 import * as utils from './utils'
 
 type EnvConfig = {
+  wsAddress: string
   submitterAddress: Kilt.KiltAddress
   didMnemonic: string
   keyType: KeypairType
@@ -16,6 +18,14 @@ type EnvConfig = {
 }
 
 function parseEnv(): EnvConfig {
+  config()
+  let wsAddress = process.env.WS_ADDRESS
+  if (!wsAddress) {
+    const defaultWsAddress = 'wss://spiritnet.kilt.io'
+    console.log(`WS_ADDRESS not specified. Using '${defaultWsAddress}' by default.`)
+    wsAddress = defaultWsAddress
+  }
+
   const submitterAddress = process.env.SUBMITTER_ADDRESS as Kilt.KiltAddress
   if (!submitterAddress) {
     throw `No SUBMITTER_ADDRESS env variable specified.`
@@ -29,7 +39,7 @@ function parseEnv(): EnvConfig {
   let keyType = process.env.DID_KEY_TYPE as KeypairType
   if (!keyType) {
     const defaultKeyType: KeypairType = 'sr25519'
-    console.log(`Mnemonic not specified. Using '${defaultKeyType}' by default.`)
+    console.log(`DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`)
     keyType = defaultKeyType
   }
 
@@ -40,19 +50,21 @@ function parseEnv(): EnvConfig {
 
   const didUri = process.env.DID_URI as Kilt.DidUri | undefined
 
-  return { submitterAddress, didMnemonic, keyType, didUri, linkedAccount }
+  return { wsAddress, submitterAddress, didMnemonic, keyType, didUri, linkedAccount }
 }
 
 async function main() {
-  const keyring = new Keyring()
-
   const {
+    wsAddress,
     submitterAddress,
     didMnemonic,
     keyType,
     didUri: parsedDidUri,
     linkedAccount,
   } = parseEnv()
+
+  const keyring = new Keyring()
+  await Kilt.connect(wsAddress)
 
   // Re-create DID auth key
   const authKey = keyring.addFromMnemonic(

@@ -3,19 +3,30 @@ import type { KeypairType } from '@polkadot/util-crypto/types'
 import * as Kilt from '@kiltprotocol/sdk-js'
 
 import { Keyring } from '@polkadot/api'
+import { config } from 'dotenv'
 
 import * as utils from './utils'
 
 type EnvConfig = {
+  wsAddress: string
   submitterAddress: Kilt.KiltAddress
   didMnemonic: string
   keyType: KeypairType
   didUri?: Kilt.DidUri
-  wsAddress: string
   encodedTx: `0x${string}`
 }
 
 function parseEnv(): EnvConfig {
+  config()
+  let wsAddress = process.env.WS_ADDRESS
+  if (!wsAddress) {
+    const defaultWsAddress = 'wss://spiritnet.kilt.io'
+    console.log(
+      `WS_ADDRESS not specified. Using '${defaultWsAddress}' by default.`
+    )
+    wsAddress = defaultWsAddress
+  }
+
   const submitterAddress = process.env.SUBMITTER_ADDRESS as Kilt.KiltAddress
   if (!submitterAddress) {
     throw `No SUBMITTER_ADDRESS env variable specified.`
@@ -29,22 +40,13 @@ function parseEnv(): EnvConfig {
   let keyType = process.env.DID_KEY_TYPE as KeypairType
   if (!keyType) {
     const defaultKeyType: KeypairType = 'sr25519'
-    console.log(`Mnemonic not specified. Using '${defaultKeyType}' by default.`)
+    console.log(`DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`)
     keyType = defaultKeyType
   }
 
   const encodedTx = process.env.ENCODED_TX as `0x{string}`
   if (!encodedTx) {
     throw `No ENCODED_TX env variable specified.`
-  }
-
-  let wsAddress = process.env.WS_ADDRESS
-  if (!wsAddress) {
-    const defaultWsAddress = 'wss://spiritnet.kilt.io'
-    console.log(
-      `WSS address not specified. Using '${defaultWsAddress}' by default.`
-    )
-    wsAddress = defaultWsAddress
   }
 
   const didUri = process.env.DID_URI as Kilt.DidUri | undefined
@@ -60,16 +62,17 @@ function parseEnv(): EnvConfig {
 }
 
 async function main() {
-  const keyring = new Keyring()
-
   const {
+    wsAddress,
     submitterAddress,
     didMnemonic,
     keyType,
     didUri: parsedDidUri,
     encodedTx,
-    wsAddress,
   } = parseEnv()
+
+  const keyring = new Keyring()
+  await Kilt.connect(wsAddress)
 
   const api = await Kilt.connect(wsAddress) // Re-create DID auth key
   const authKey = keyring.addFromMnemonic(
