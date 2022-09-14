@@ -9,7 +9,7 @@
     "unlink-account": "ts-node src/unlink-account.ts"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "^0.28.2",
+    "@kiltprotocol/sdk-js": "^0.29.0-rc.1",
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
