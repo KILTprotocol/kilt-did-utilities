@@ -2,11 +2,11 @@
   "name": "kilt-did-utilities",
   "license": "MIT",
   "scripts": {
-    "auth-sign-tx": "ts-node src/auth-sign-tx",
-    "create-did": "ts-node src/create-did.ts",
-    "claim-web3name": "ts-node src/claim-web3name.ts",
-    "link-account": "ts-node src/link-account.ts",
-    "unlink-account": "ts-node src/unlink-account.ts",
+    "account-link": "ts-node src/account-link.ts",
+    "account-unlink": "ts-node src/account-unlink.ts",
+    "did-create": "ts-node src/did-create.ts",
+    "tx-sign": "ts-node src/tx-sign",
+    "web3name-claim": "ts-node src/web3name-claim.ts",
     "lint": "eslint . --ext .ts --format=codeframe",
     "lint:fix": "yarn lint --fix",
     "style": "prettier --check --config .prettierrc '**/*.ts'",
@@ -29,5 +29,26 @@
     "prettier": "^2.5.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
+  },
+  "resolutions": {
+    "stackframe": "1.3.4",
+    "debug": "3.2.7",
+    "ms": "2.1.2",
+    "type": "2.7.2",
+    "tslib": "2.4.0",
+    "semver": "7.3.7",
+    "eslint-visitor-keys": "3.3.0",
+    "glob-parent": "6.0.2",
+    "eslint-scope": "7.1.1",
+    "eslint-utils": "3.0.0",
+    "estraverse": "5.3.0",
+    "chalk": "4.1.2",
+    "doctrine": "3.0.0",
+    "escape-string-regexp": "4.0.0",
+    "ansi-styles": "4.3.0",
+    "supports-color": "7.2.0",
+    "color-convert": "2.0.1",
+    "color-name": "1.1.4",
+    "has-flag": "4.0.0"
   }
 }
