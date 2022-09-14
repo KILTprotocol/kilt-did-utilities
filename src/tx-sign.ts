@@ -1,11 +1,10 @@
-import type { KeypairType } from "@polkadot/util-crypto/types"
+import type { KeypairType } from '@polkadot/util-crypto/types'
 
-import { mnemonicGenerate } from "@polkadot/util-crypto"
+import * as Kilt from '@kiltprotocol/sdk-js'
+
 import { Keyring } from '@polkadot/api'
-import * as Kilt from "@kiltprotocol/sdk-js"
 
-import * as utils from "./utils"
-import { KeyringPair } from "@kiltprotocol/sdk-js"
+import * as utils from './utils'
 
 type EnvConfig = {
   submitterAddress: Kilt.KiltAddress
@@ -42,13 +41,22 @@ function parseEnv(): EnvConfig {
   let wsAddress = process.env.WS_ADDRESS
   if (!wsAddress) {
     const defaultWsAddress = 'wss://spiritnet.kilt.io'
-    console.log(`WSS address not specified. Using '${defaultWsAddress}' by default.`)
+    console.log(
+      `WSS address not specified. Using '${defaultWsAddress}' by default.`
+    )
     wsAddress = defaultWsAddress
   }
 
   const didUri = process.env.DID_URI as Kilt.DidUri | undefined
 
-  return { submitterAddress, didMnemonic, keyType, didUri, wsAddress, encodedTx }
+  return {
+    submitterAddress,
+    didMnemonic,
+    keyType,
+    didUri,
+    wsAddress,
+    encodedTx,
+  }
 }
 
 async function main() {
@@ -60,33 +68,51 @@ async function main() {
     keyType,
     didUri: parsedDidUri,
     encodedTx,
-    wsAddress
+    wsAddress,
   } = parseEnv()
 
-  const api = await Kilt.connect(wsAddress)// Re-create DID auth key
-  const authKey = keyring.addFromMnemonic(didMnemonic, {}, keyType) as Kilt.KiltKeyringPair
+  const api = await Kilt.connect(wsAddress) // Re-create DID auth key
+  const authKey = keyring.addFromMnemonic(
+    didMnemonic,
+    {},
+    keyType
+  ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri = Kilt.Did.Utils.getFullDidUriFromKey(authKey)
-    console.log(`DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`)
+    const defaultDidUri: Kilt.DidUri =
+      Kilt.Did.Utils.getFullDidUriFromKey(authKey)
+    console.log(
+      `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
+    )
     didUri = defaultDidUri
   }
   const fullDid: Kilt.DidDocument = {
     uri: didUri,
-    authentication: [{
-      ...authKey,
-      // Not needed
-      id: '#key'
-    }]
+    authentication: [
+      {
+        ...authKey,
+        // Not needed
+        id: '#key',
+      },
+    ],
   }
 
   const decodedCall = api.createType('Call', encodedTx)
   const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
   const extrinsic = api.tx[section][method](...decodedCall.args)
-  const signedExtrinsic = await Kilt.Did.authorizeExtrinsic(fullDid, extrinsic, utils.getKeypairSigningCallback(keyring), submitterAddress)
+  const signedExtrinsic = await Kilt.Did.authorizeExtrinsic(
+    fullDid,
+    extrinsic,
+    utils.getKeypairSigningCallback(keyring),
+    submitterAddress
+  )
 
   const encodedOperation = signedExtrinsic.toHex()
-  console.log(`Encoded DID-authorized operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(
+    `Encoded DID-authorized operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`
+  )
 }
 
-main().catch((e) => console.error(e)).then(() => process.exit(0))
+main()
+  .catch((e) => console.error(e))
+  .then(() => process.exit(0))

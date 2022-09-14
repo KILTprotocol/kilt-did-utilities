@@ -6,13 +6,27 @@
     "create-did": "ts-node src/create-did.ts",
     "claim-web3name": "ts-node src/claim-web3name.ts",
     "link-account": "ts-node src/link-account.ts",
-    "unlink-account": "ts-node src/unlink-account.ts"
+    "unlink-account": "ts-node src/unlink-account.ts",
+    "lint": "eslint . --ext .ts --format=codeframe",
+    "lint:fix": "yarn lint --fix",
+    "style": "prettier --check --config .prettierrc '**/*.ts'",
+    "style:fix": "yarn style --write",
+    "fix": "yarn lint:fix && yarn style:fix"
   },
   "dependencies": {
     "@kiltprotocol/sdk-js": "^0.29.0-rc.1",
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.10.0",
+    "eslint-config-prettier": "^8.4.0",
+    "eslint-formatter-codeframe": "^7.32.1",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
   }

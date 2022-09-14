@@ -1,10 +1,10 @@
-import type { KeypairType } from "@polkadot/util-crypto/types"
+import type { KeypairType } from '@polkadot/util-crypto/types'
 
-import { mnemonicGenerate } from "@polkadot/util-crypto"
+import * as Kilt from '@kiltprotocol/sdk-js'
+
 import { Keyring } from '@polkadot/api'
-import * as Kilt from "@kiltprotocol/sdk-js"
 
-import * as utils from "./utils"
+import * as utils from './utils'
 
 type EnvConfig = {
   submitterAddress: Kilt.KiltAddress
@@ -47,27 +47,45 @@ async function main() {
   } = parseEnv()
 
   // Re-create DID auth key
-  const authKey = keyring.addFromMnemonic(didMnemonic, {}, keyType) as Kilt.KiltKeyringPair
+  const authKey = keyring.addFromMnemonic(
+    didMnemonic,
+    {},
+    keyType
+  ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri = Kilt.Did.Utils.getFullDidUriFromKey(authKey)
-    console.log(`DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`)
+    const defaultDidUri: Kilt.DidUri =
+      Kilt.Did.Utils.getFullDidUriFromKey(authKey)
+    console.log(
+      `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
+    )
     didUri = defaultDidUri
   }
   const fullDid: Kilt.DidDocument = {
     uri: didUri,
-    authentication: [{
-      ...authKey,
-      // Not needed
-      id: '#key'
-    }]
+    authentication: [
+      {
+        ...authKey,
+        // Not needed
+        id: '#key',
+      },
+    ],
   }
 
   const linkTx = await Kilt.Did.AccountLinks.getAssociateSenderExtrinsic()
-  const authorizedLinkTx = await Kilt.Did.authorizeExtrinsic(fullDid, linkTx, utils.getKeypairSigningCallback(keyring), submitterAddress)
+  const authorizedLinkTx = await Kilt.Did.authorizeExtrinsic(
+    fullDid,
+    linkTx,
+    utils.getKeypairSigningCallback(keyring),
+    submitterAddress
+  )
 
   const encodedOperation = authorizedLinkTx.toHex()
-  console.log(`Encoded account linking operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`)
+  console.log(
+    `Encoded account linking operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`
+  )
 }
 
-main().catch((e) => console.error(e)).then(() => process.exit(0))
+main()
+  .catch((e) => console.error(e))
+  .then(() => process.exit(0))
