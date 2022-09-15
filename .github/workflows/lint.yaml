@@ -1,0 +1,27 @@
+name: lint-code
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Test linting and prettier rules
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Test eslint and prettier rules
+        run: |
+          yarn install --frozen-lockfile
+          yarn lint && yarn style
