@@ -40,7 +40,9 @@ function parseEnv(): EnvConfig {
   let keyType = process.env.DID_KEY_TYPE as KeypairType
   if (!keyType) {
     const defaultKeyType: KeypairType = 'sr25519'
-    console.log(`DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`)
+    console.log(
+      `DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`
+    )
     keyType = defaultKeyType
   }
 

@@ -20,7 +20,9 @@ function parseEnv(): EnvConfig {
   let wsAddress = process.env.WS_ADDRESS
   if (!wsAddress) {
     const defaultWsAddress = 'wss://spiritnet.kilt.io'
-    console.log(`WS_ADDRESS not specified. Using '${defaultWsAddress}' by default.`)
+    console.log(
+      `WS_ADDRESS not specified. Using '${defaultWsAddress}' by default.`
+    )
     wsAddress = defaultWsAddress
   }
 
@@ -44,7 +46,9 @@ function parseEnv(): EnvConfig {
   let keyType = process.env.DID_KEY_TYPE as KeypairType
   if (!keyType) {
     const defaultKeyType: KeypairType = 'sr25519'
-    console.log(`DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`)
+    console.log(
+      `DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`
+    )
     keyType = defaultKeyType
   }
 
