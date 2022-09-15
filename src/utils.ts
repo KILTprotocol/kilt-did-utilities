@@ -1,35 +1,31 @@
-import { config as envConfig } from "dotenv"
+import type { KeypairType } from '@polkadot/util-crypto/types'
 
-import { ApiPromise } from "@polkadot/api"
-import * as Kilt from "@kiltprotocol/sdk-js"
+import * as Kilt from '@kiltprotocol/sdk-js'
 
-export async function config(): Promise<Kilt.ChainHelpers.Blockchain> {
-  envConfig()
+import { blake2AsU8a, encodeAddress } from '@polkadot/util-crypto'
+import { Keyring } from '@polkadot/api'
 
-  let wsEndpoint = process.env.WS_ENDPOINT
-  if (!wsEndpoint) {
-    const defaultEndpoint = "wss://spiritnet.kilt.io"
-    console.warn(`No env variable WS_ENDPOINT specified. Using the default "${defaultEndpoint}"`)
-    wsEndpoint = defaultEndpoint
+export function getKeypairSigningCallback(
+  keyring: Keyring
+): Kilt.SignCallback<Kilt.SigningAlgorithms> {
+  return async ({ alg, data, publicKey }) => {
+    const keyPreAddress =
+      alg === 'ecdsa-secp256k1' ? blake2AsU8a(publicKey) : publicKey
+    const address = encodeAddress(keyPreAddress, Kilt.Utils.ss58Format)
+    const signature = keyring.getPair(address).sign(data)
+    return {
+      alg,
+      data: signature,
+    }
   }
-
-  await Kilt.init({ address: wsEndpoint })
-  return Kilt.connect()
 }
 
-export function computeChainKeyId(publicKey: Kilt.Did.DidChain.ChainDidPublicKey): Kilt.DidKey['id'] {
-  return Kilt.Utils.Crypto.hashStr(publicKey.toU8a())
+export type Defaults = {
+  wsAddress: string
+  keyType: KeypairType
 }
 
-function formatPublicKey(key: Kilt.NewDidKey) {
-  const { type, publicKey } = key
-  return { [type]: publicKey }
-}
-
-export function encodeToChainKey(api: ApiPromise, key: Kilt.NewDidVerificationKey) {
-  return new (api.registry.getOrThrow<Kilt.Did.DidChain.ChainDidPublicKey>(
-    'DidDidDetailsDidPublicKey'
-  ))(api.registry, {
-    ["PublicVerificationKey"]: formatPublicKey(key),
-  })
+export const defaults: Defaults = {
+  wsAddress: 'wss://spiritnet.kilt.io',
+  keyType: 'sr25519'
 }

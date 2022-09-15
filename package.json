@@ -2,18 +2,29 @@
   "name": "kilt-did-utilities",
   "license": "MIT",
   "scripts": {
-    "auth-sign-tx": "ts-node src/auth-sign-tx",
-    "create-did": "ts-node src/create-did.ts",
-    "claim-web3name": "ts-node src/claim-web3name.ts",
-    "link-account": "ts-node src/link-account.ts",
-    "unlink-account": "ts-node src/unlink-account.ts"
+    "account-link": "ts-node src/account-link.ts",
+    "account-unlink": "ts-node src/account-unlink.ts",
+    "did-create": "ts-node src/did-create.ts",
+    "tx-sign": "ts-node src/tx-sign",
+    "web3name-claim": "ts-node src/web3name-claim.ts",
+    "lint": "eslint . --ext .ts --format=codeframe",
+    "lint:fix": "yarn lint --fix",
+    "style": "prettier --check --config .prettierrc '**/*.ts'",
+    "style:fix": "yarn style --write",
+    "fix": "yarn lint:fix && yarn style:fix"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "0.27.0-beta.1",
-    "dotenv": "^16.0.0"
+    "@kiltprotocol/sdk-js": "^0.29.0-rc.1",
+    "dotenv": "^16.0.1"
   },
   "devDependencies": {
-    "ts-node": "^10.7.0",
-    "typescript": "^4.6.2"
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-formatter-codeframe": "^7.32.1",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4"
   }
 }

@@ -14,25 +14,27 @@ This script requires the following env variables:
 
 The following optional env variables can be passed:
 
-- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
 - `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**. Defaults to a random one.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
 
-To run this script, execute `yarn run create-did`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+To run this script, execute `yarn did-create`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
 
-## Claim a web3 name
+## Claim a web3name
 
 This script requires the following env variables:
 
 - `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
 - `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**.
-- `WEB3_NAME`: The web3 name to claim.
+- `WEB3_NAME`: The web3name to claim.
 
 The following optional env variables can be passed:
 
-- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
-- `NONCE`: The nonce to use to sign the DID operation. Defaults to the one after the one currently on chain.
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+- `DID_URI`: The URI of the DID authorizing the operation. It defaults to the one derived from the mnemonic (works only if the DID has not updated its authentication key since creation).
 
-To run this script, execute `yarn run claim-web3name` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+To run this script, execute `yarn web3name-claim` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
 
 ## Link an account
 
@@ -41,7 +43,13 @@ This script requires the following env variables:
 - `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
 - `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**.
 
-To run this script, execute `yarn run link-account` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+The following optional env variables can be passed:
+
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+- `DID_URI`: The URI of the DID authorizing the operation. It defaults to the one derived from the mnemonic (works only if the DID has not updated its authentication key since creation).
+
+To run this script, execute `yarn account-link` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
 
 ## Unlink an account
 
@@ -49,11 +57,17 @@ This script requires the following env variables:
 
 - `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
 - `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**.
-- `UNLINK_ACCOUNT`: The address of the account to unlink from the provided DID.
+- `LINKED_ACCOUNT`: The address of the account to unlink from the provided DID.
+
+The following optional env variables can be passed:
+
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+- `DID_URI`: The URI of the DID authorizing the operation. It defaults to the one derived from the mnemonic (works only if the DID has not updated its authentication key since creation).
 
 To run this script, execute `yarn run unlink-account` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
 
-## DID-sign an encoded extrinsic with the authentication key
+## Authorize an extrinsic with a DID's authentication key
 
 This script requires the following env variables:
 
@@ -63,7 +77,8 @@ This script requires the following env variables:
 
 The following optional env variables can be passed:
 
-- `WS_ENDPOINT`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
-- `NONCE`: The nonce to use to sign the DID operation. Defaults to the one after the one currently on chain.
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+- `DID_URI`: The URI of the DID authorizing the operation. It defaults to the one derived from the mnemonic (works only if the DID has not updated its authentication key since creation).
 
-To run this script, execute `yarn run auth-sign-tx` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+To run this script, execute `yarn tx-sign` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
