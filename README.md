@@ -20,6 +20,38 @@ The following optional env variables can be passed:
 
 To run this script, execute `yarn did-create`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
 
+## Add a service endpoint
+
+This script requires the following env variables:
+
+- `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
+- `SERVICE_ID`: The ID of the new service endpoint, **including the leading `#` symbol**.
+- `SERVICE_TYPE`: The only type of the new service endpoint.
+- `SERVICE_URL`: The only URL of the new service endpoint.
+
+The following optional env variables can be passed:
+
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**. Defaults to a random one.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+
+To run this script, execute `yarn endpoint-add`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+
+## Remove a service endpoint
+
+This script requires the following env variables:
+
+- `SUBMITTER_ADDRESS`: The KILT address of the DID creation operation.
+- `SERVICE_ID`: The ID of the service endpoint to remove, **including the leading `#` symbol**.
+
+The following optional env variables can be passed:
+
+- `WS_ADDRESS`: The RCP endpoint. Defaults to `wss://spiritnet.kilt.io`.
+- `DID_MNEMONIC`: The mnemonic of the DID to create, **including any derivation path**. Defaults to a random one.
+- `DID_KEY_TYPE`: The key type to generate the DID authentication key. Defaults to `sr25519`.
+
+To run this script, execute `yarn endpoint-remove`, save the DID mnemonic that is printed on the console, and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps](https://polkadot.js.org/apps/#/) using the account specified in `SUBMITTER_ADDRESS`.
+
 ## Claim a web3name
 
 This script requires the following env variables:

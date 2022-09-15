@@ -27,5 +27,5 @@ export type Defaults = {
 
 export const defaults: Defaults = {
   wsAddress: 'wss://spiritnet.kilt.io',
-  keyType: 'sr25519'
+  keyType: 'sr25519',
 }
