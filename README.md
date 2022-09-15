@@ -1,3 +1,5 @@
+![](.maintain/media/kilt.png)
+
 # KILT DID utilities
 
 Different scripts that can be used to perform different DID-related operations.
