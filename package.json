@@ -5,6 +5,8 @@
     "account-link": "ts-node src/account-link.ts",
     "account-unlink": "ts-node src/account-unlink.ts",
     "did-create": "ts-node src/did-create.ts",
+    "endpoint-add": "ts-node src/endpoint-add.ts",
+    "endpoint-remove": "ts-node src/endpoint-remove.ts",
     "tx-sign": "ts-node src/tx-sign",
     "web3name-claim": "ts-node src/web3name-claim.ts",
     "lint": "eslint . --ext .ts --format=codeframe",
