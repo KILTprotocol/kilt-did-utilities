@@ -1,3 +1,5 @@
+import type { KeypairType } from '@polkadot/util-crypto/types'
+
 import * as Kilt from '@kiltprotocol/sdk-js'
 
 import { blake2AsU8a, encodeAddress } from '@polkadot/util-crypto'
@@ -16,4 +18,14 @@ export function getKeypairSigningCallback(
       data: signature,
     }
   }
+}
+
+export type Defaults = {
+  wsAddress: string
+  keyType: KeypairType
+}
+
+export const defaults: Defaults = {
+  wsAddress: 'wss://spiritnet.kilt.io',
+  keyType: 'sr25519'
 }
