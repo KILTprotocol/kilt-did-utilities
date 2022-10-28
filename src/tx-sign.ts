@@ -76,16 +76,16 @@ async function main() {
   const keyring = new Keyring()
   await Kilt.connect(wsAddress)
 
-  const api = await Kilt.connect(wsAddress) // Re-create DID auth key
-  const authKey = keyring.addFromMnemonic(
+  const api = await Kilt.connect(wsAddress)
+  // Use provided seed for all keys
+  const key = keyring.addFromMnemonic(
     didMnemonic,
     {},
     keyType
   ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri =
-      Kilt.Did.Utils.getFullDidUriFromKey(authKey)
+    const defaultDidUri: Kilt.DidUri = Kilt.Did.Utils.getFullDidUriFromKey(key)
     console.log(
       `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
     )
@@ -95,9 +95,23 @@ async function main() {
     uri: didUri,
     authentication: [
       {
-        ...authKey,
+        ...key,
         // Not needed
-        id: '#key',
+        id: '#key1',
+      },
+    ],
+    assertionMethod: [
+      {
+        ...key,
+        // Not needed
+        id: '#key2',
+      },
+    ],
+    capabilityDelegation: [
+      {
+        ...key,
+        // Not needed
+        id: '#key3',
       },
     ],
   }

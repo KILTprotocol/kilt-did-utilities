@@ -115,7 +115,7 @@ The following optional env variables can be passed:
 
 To run this script, execute `yarn run unlink-account` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps][polkadot-apps] in `Developer > Extrinsics > Decode`, using the account specified in `SUBMITTER_ADDRESS`.
 
-## Authorize an extrinsic with a DID's authentication key
+## Authorize an extrinsic with a DID key
 
 This script signs any valid HEX-encoded extrinsic with the *authentication* key of the provided full DID.
 
