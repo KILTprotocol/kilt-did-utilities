@@ -12,7 +12,7 @@ type EnvConfig = {
   submitterAddress: Kilt.KiltAddress
   didMnemonic: string
   keyType: KeypairType
-  web3Name: Kilt.Did.Web3Names.Web3Name
+  web3Name: Kilt.Did.Web3Name
   didUri?: Kilt.DidUri
 }
 
@@ -46,7 +46,7 @@ function parseEnv(): EnvConfig {
     keyType = defaultKeyType
   }
 
-  const web3Name = process.env.WEB3_NAME as Kilt.Did.Web3Names.Web3Name
+  const web3Name = process.env.WEB3_NAME as Kilt.Did.Web3Name
   if (!web3Name) {
     throw `No WEB3_NAME env variable specified.`
   }
@@ -67,7 +67,7 @@ async function main() {
   } = parseEnv()
 
   const keyring = new Keyring()
-  await Kilt.connect(wsAddress)
+  const api = await Kilt.connect(wsAddress)
 
   // Re-create DID auth key
   const authKey = keyring.addFromMnemonic(
@@ -77,8 +77,7 @@ async function main() {
   ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri =
-      Kilt.Did.Utils.getFullDidUriFromKey(authKey)
+    const defaultDidUri: Kilt.DidUri = Kilt.Did.getFullDidUriFromKey(authKey)
     console.log(
       `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
     )
@@ -95,11 +94,11 @@ async function main() {
     ],
   }
 
-  const claimTx = await Kilt.Did.Web3Names.getClaimTx(web3Name)
-  const authorizedClaimTx = await Kilt.Did.authorizeExtrinsic(
-    fullDid,
+  const claimTx = await api.tx.web3Names.claim(web3Name)
+  const authorizedClaimTx = await Kilt.Did.authorizeTx(
+    fullDid.uri,
     claimTx,
-    utils.getKeypairSigningCallback(keyring),
+    utils.getKeypairTxSigningCallback(authKey),
     submitterAddress
   )
 
