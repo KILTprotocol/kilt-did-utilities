@@ -12,7 +12,7 @@ type EnvConfig = {
   submitterAddress: Kilt.KiltAddress
   didMnemonic: string
   keyType: KeypairType
-  web3Name: Kilt.Did.Web3Names.Web3Name
+  web3Name: Kilt.Did.Web3Name
   didUri?: Kilt.DidUri
 }
 
@@ -46,7 +46,7 @@ function parseEnv(): EnvConfig {
     keyType = defaultKeyType
   }
 
-  const web3Name = process.env.WEB3_NAME as Kilt.Did.Web3Names.Web3Name
+  const web3Name = process.env.WEB3_NAME as Kilt.Did.Web3Name
   if (!web3Name) {
     throw `No WEB3_NAME env variable specified.`
   }
