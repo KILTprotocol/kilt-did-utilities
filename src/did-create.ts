@@ -66,12 +66,12 @@ async function main() {
     {},
     keyType
   ) as Kilt.KiltKeyringPair
-  const fullDidCreationTx = await Kilt.Did.Chain.getStoreTx(
+  const fullDidCreationTx = await Kilt.Did.getStoreTx(
     {
       authentication: [authKey],
     },
     submitterAddress,
-    utils.getKeypairSigningCallback(keyring)
+    utils.getKeypairTxSigningCallback(authKey)
   )
 
   const encodedOperation = fullDidCreationTx.toHex()

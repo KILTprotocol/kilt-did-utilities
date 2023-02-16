@@ -85,7 +85,7 @@ async function main() {
   ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri = Kilt.Did.Utils.getFullDidUriFromKey(key)
+    const defaultDidUri: Kilt.DidUri = Kilt.Did.getFullDidUriFromKey(key)
     console.log(
       `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
     )
@@ -119,10 +119,10 @@ async function main() {
   const decodedCall = api.createType('Call', encodedTx)
   const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
   const extrinsic = api.tx[section][method](...decodedCall.args)
-  const signedExtrinsic = await Kilt.Did.authorizeExtrinsic(
-    fullDid,
+  const signedExtrinsic = await Kilt.Did.authorizeTx(
+    fullDid.uri,
     extrinsic,
-    utils.getKeypairSigningCallback(keyring),
+    utils.getKeypairTxSigningCallback(key),
     submitterAddress
   )
 

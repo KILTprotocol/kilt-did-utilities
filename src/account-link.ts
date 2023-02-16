@@ -60,7 +60,7 @@ async function main() {
   } = parseEnv()
 
   const keyring = new Keyring()
-  await Kilt.connect(wsAddress)
+  const api = await Kilt.connect(wsAddress)
 
   // Re-create DID auth key
   const authKey = keyring.addFromMnemonic(
@@ -70,8 +70,7 @@ async function main() {
   ) as Kilt.KiltKeyringPair
   let didUri = parsedDidUri
   if (!didUri) {
-    const defaultDidUri: Kilt.DidUri =
-      Kilt.Did.Utils.getFullDidUriFromKey(authKey)
+    const defaultDidUri: Kilt.DidUri = Kilt.Did.getFullDidUriFromKey(authKey)
     console.log(
       `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
     )
@@ -88,11 +87,11 @@ async function main() {
     ],
   }
 
-  const linkTx = await Kilt.Did.AccountLinks.getAssociateSenderExtrinsic()
-  const authorizedLinkTx = await Kilt.Did.authorizeExtrinsic(
-    fullDid,
+  const linkTx = await api.tx.didLookup.associateSender()
+  const authorizedLinkTx = await Kilt.Did.authorizeTx(
+    fullDid.uri,
     linkTx,
-    utils.getKeypairSigningCallback(keyring),
+    utils.getKeypairTxSigningCallback(authKey),
     submitterAddress
   )
 
