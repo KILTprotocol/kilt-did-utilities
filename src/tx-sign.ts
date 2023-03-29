@@ -16,14 +16,10 @@ async function main() {
     )
   }
 
-  const authKey = utils.generateAuthenticationKey()
-  if (authKey === undefined) {
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `DID authentication key mnemonic could not be found. Please specify one of the following variables: '${utils.envNames.authMnemonic}', '${utils.envNames.authDerivationPath} depending on the use case.'
-    `
-    )
-  }
+  // eslint-disable-next-line max-len
+  const authKey =
+    utils.generateAuthenticationKey() ??
+    Kilt.Utils.Crypto.makeKeypairFromUri('//Alice')
   const assertionKey = utils.generateAttestationKey()
   const delegationKey = utils.generateDelegationKey()
 
@@ -58,7 +54,7 @@ async function main() {
           {
             ...delegationKey,
             // Not needed
-            id: '#key',
+            id: '#key3',
           },
         ]
       : undefined,

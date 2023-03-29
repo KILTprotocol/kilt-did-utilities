@@ -9,15 +9,6 @@ import * as utils from './utils'
 async function main() {
   await Kilt.connect(utils.readWsAddress())
 
-  if (process.env[utils.envNames.didMnemonic] === undefined) {
-    console.log(
-      `${utils.envNames.didMnemonic} not specified. Generating a random one...`
-    )
-    const mnemonic = mnemonicGenerate()
-    process.env[utils.envNames.didMnemonic] = mnemonic
-    console.log(`DID mnemonic: ${mnemonic}. Please save this somewhere safe.`)
-  }
-
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
   ] as Kilt.KiltAddress
@@ -25,6 +16,18 @@ async function main() {
     throw new Error(
       `No ${utils.envNames.submitterAddress} env variable specified.`
     )
+  }
+
+  if (
+    process.env[utils.envNames.didMnemonic] === undefined &&
+    process.env[utils.envNames.authMnemonic] === undefined
+  ) {
+    console.log(
+      `${utils.envNames.didMnemonic} not specified. Generating a random one...`
+    )
+    const mnemonic = mnemonicGenerate()
+    process.env[utils.envNames.didMnemonic] = mnemonic
+    console.log(`DID mnemonic: ${mnemonic}. Please save this somewhere safe.`)
   }
 
   const authKey = utils.generateAuthenticationKey()
