@@ -21,13 +21,17 @@ type EnvConfig = {
 
 function parseEnv(): EnvConfig {
   config()
-  let wsAddress = process.env[utils.envNames.wsAddress]
-  if (wsAddress === undefined) {
-    console.log(
-      `${utils.envNames.wsAddress} not specified. Using '${utils.defaults.wsAddress}' by default.`
-    )
-    wsAddress = utils.defaults.wsAddress
-  }
+
+  const wsAddress = (() => {
+    let wsAddress = process.env[utils.envNames.wsAddress]
+    if (wsAddress === undefined) {
+      console.log(
+        `${utils.envNames.wsAddress} not specified. Using '${utils.defaults.wsAddress}' by default.`
+      )
+      wsAddress = utils.defaults.wsAddress
+    }
+    return wsAddress
+  })()
 
   const submitterAddress = process.env[utils.envNames.submitterAddress] as Kilt.KiltAddress
   if (submitterAddress === undefined) {
