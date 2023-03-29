@@ -9,8 +9,7 @@ import * as utils from './utils'
 async function main() {
   await Kilt.connect(utils.readWsAddress())
 
-  const baseMnemonic = process.env[utils.envNames.didMnemonic]
-  if (baseMnemonic === undefined) {
+  if (process.env[utils.envNames.didMnemonic] === undefined) {
     console.log(
       `${utils.envNames.didMnemonic} not specified. Generating a random one...`
     )

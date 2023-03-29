@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import * as Kilt from '@kiltprotocol/sdk-js'
 
 import * as utils from './utils'

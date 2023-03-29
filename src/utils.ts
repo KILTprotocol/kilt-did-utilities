@@ -1,5 +1,3 @@
-import type { KeypairType } from '@polkadot/util-crypto/types'
-
 import { Keyring } from '@polkadot/api'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
@@ -18,19 +16,14 @@ export const envNames = {
   delMnemonic: 'DEL_MNEMONIC',
   delDerivationPath: 'DEL_DERIVATION_PATH',
   delKeyType: 'DEL_KEY_TYPE',
-  linkedAccount: 'LINKED_ACCOUNT',
-  serviceId: 'SERVICE_ID',
-  serviceType: 'SERVICE_TYPE',
-  serviceEndpoint: 'SERVICE_ENDPOINT',
-  web3Name: 'WEB3_NAME',
   encodedCall: 'ENCODED_CALL',
 }
 
 type Defaults = {
   wsAddress: string
-  authKeyType: KeypairType
-  attKeyType: KeypairType
-  delKeyType: KeypairType
+  authKeyType: Kilt.KeyringPair['type']
+  attKeyType: Kilt.KeyringPair['type']
+  delKeyType: Kilt.KeyringPair['type']
 }
 
 export const defaults: Defaults = {
@@ -93,7 +86,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
   const authKeyType =
     authKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.authKeyType] as KeypairType) ||
+      : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
         defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
@@ -128,7 +121,8 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
   const attKeyType =
     attKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.attKeyType] as KeypairType) || defaults.attKeyType
+      : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -162,7 +156,8 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
   const delKeyType =
     delKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.delKeyType] as KeypairType) || defaults.delKeyType
+      : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
