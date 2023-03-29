@@ -24,12 +24,9 @@ async function main() {
     )
   }
 
-  const didUri = utils.generateDidUri()
+  const didUri = process.env[utils.envNames.didUri] as Kilt.DidUri
   if (didUri === undefined) {
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `DID URI could not be parsed. Either specify one with "${utils.envNames.didUri}" or provide the mnemonic for the authentication key, if it has never been changed for the DID.`
-    )
+    throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }
 
   const newDelKey = utils.generateDelegationKey()
@@ -48,10 +45,12 @@ async function main() {
         // Not needed
         id: '#key',
       },
-    ]
+    ],
   }
 
-  const newDelKeyTx = api.tx.did.setAttestationKey(Kilt.Did.publicKeyToChain(newDelKey))
+  const newDelKeyTx = api.tx.did.setAttestationKey(
+    Kilt.Did.publicKeyToChain(newDelKey)
+  )
 
   const signedExtrinsic = await Kilt.Did.authorizeTx(
     fullDid.uri,

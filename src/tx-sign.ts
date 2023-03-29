@@ -23,12 +23,9 @@ async function main() {
   const assertionKey = utils.generateAttestationKey()
   const delegationKey = utils.generateDelegationKey()
 
-  const didUri = utils.generateDidUri()
+  const didUri = process.env[utils.envNames.didUri] as Kilt.DidUri
   if (didUri === undefined) {
-    throw new Error(
-      // eslint-disable-next-line max-len
-      `DID URI could not be parsed. Either specify one with "${utils.envNames.didUri}" or provide the mnemonic for the authentication key, if it has never been changed for the DID.`
-    )
+    throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }
 
   const fullDid: Kilt.DidDocument = {
@@ -42,21 +39,21 @@ async function main() {
     ],
     assertionMethod: assertionKey
       ? [
-        {
-          ...assertionKey,
-          // Not needed
-          id: '#key2',
-        },
-      ]
+          {
+            ...assertionKey,
+            // Not needed
+            id: '#key2',
+          },
+        ]
       : undefined,
     capabilityDelegation: delegationKey
       ? [
-        {
-          ...delegationKey,
-          // Not needed
-          id: '#key3',
-        },
-      ]
+          {
+            ...delegationKey,
+            // Not needed
+            id: '#key3',
+          },
+        ]
       : undefined,
   }
 

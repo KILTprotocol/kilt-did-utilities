@@ -90,7 +90,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -125,7 +125,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.attKeyType
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -160,7 +160,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.delKeyType
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -169,25 +169,6 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     ) as Kilt.KiltKeyringPair
   } else {
     return undefined
-  }
-}
-
-export function generateDidUri(): Kilt.DidUri | undefined {
-  const parsedUri = process.env[envNames.didUri] as Kilt.DidUri
-  if (parsedUri !== undefined) {
-    console.log(`Using the provided DID URI for the operation: ${parsedUri}.`)
-    return parsedUri
-  } else {
-    const authKey = generateAuthenticationKey()
-    if (authKey !== undefined) {
-      const derivedUri = Kilt.Did.getFullDidUriFromKey(authKey)
-      console.log(
-        `Deriving the DID URI from the provided authentication key mnemonic: ${derivedUri}`
-      )
-      return derivedUri
-    } else {
-      return undefined
-    }
   }
 }
 
@@ -208,13 +189,15 @@ function readNewAuthenticationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
-export function generateNewAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
+export function generateNewAuthenticationKey():
+  | Kilt.KiltKeyringPair
+  | undefined {
   const authKeyMnemonic = readNewAuthenticationKeyMnemonic()
   const authKeyType =
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,

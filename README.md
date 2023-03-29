@@ -45,6 +45,7 @@ The following env variables are required:
 
 - `SUBMITTER_ADDRESS`: The KILT address (encoded with the KILT network prefix `38`) that is authorized to submit the transaction.
 - `ENCODED_TX`: The HEX-encoded call to DID-sign.
+- `DID_URI`: The URI of the DID authorizing the operation
 
 The following optional env variables can be passed:
 
@@ -60,11 +61,20 @@ To run this script, execute `yarn call-authorize` and then copy the HEX-encoded 
 
 ## Change a DID key
 
-There are scripts to change each of the keys of a DID:
+The following env variables are required:
 
-- `yarn auth-key-set` changes the current DID authentication key with the new one derived from either `NEW_AUTH_MNEMONIC` or `NEW_AUTH_DERIVATION_PATH`
-- `yarn att-key-set` changes the current DID assertion method key with a new one derived from either `ATT_MNEMONIC` OR `ATT_DERIVATION_PATH`
-- `yarn del-key-set` changes the current DID capability delegation key with a new one derived from either `DEL_MNEMONIC` OR `DEL_DERIVATION_PATH`
+- `SUBMITTER_ADDRESS`: The KILT address (encoded with the KILT network prefix `38`) that is authorized to submit the transaction.
+- `DID_URI`: The URI of the DID authorizing the operation
+
+The following optional env variables can be passed:
+
+- `WS_ADDRESS`: The endpoint address. Defaults to `wss://spiritnet.kilt.io`.
+
+There are scripts to change each of the keys of a DID, that require some additional variables to be specified:
+
+- `yarn auth-key-set` changes the current DID authentication key with the new one derived from either `NEW_AUTH_MNEMONIC` or `DID_MNEMONIC` and `NEW_AUTH_DERIVATION_PATH`
+- `yarn att-key-set` changes the current DID assertion method key with a new one derived from either `ATT_MNEMONIC` or `DID_MNEMONIC` and `ATT_DERIVATION_PATH`
+- `yarn del-key-set` changes the current DID capability delegation key with a new one derived from either `DEL_MNEMONIC` or `DID_MNEMONIC` and `DEL_DERIVATION_PATH`
 
 Since all operations require a DID signature generated from the current authentication key, `AUTH_MNEMONIC` or `DID_MNEMONIC` and `AUTH_DERIVATION_PATH` must still be specified to re-construct the key required to sign the operation.
 
