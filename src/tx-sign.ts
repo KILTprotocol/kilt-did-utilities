@@ -5,9 +5,13 @@ import * as utils from './utils'
 async function main() {
   const api = await Kilt.connect(utils.readWsAddress())
 
-  const submitterAddress = process.env[utils.envNames.submitterAddress] as Kilt.KiltAddress
+  const submitterAddress = process.env[
+    utils.envNames.submitterAddress
+  ] as Kilt.KiltAddress
   if (submitterAddress === undefined) {
-    throw new Error(`No ${utils.envNames.submitterAddress} env variable specified.`)
+    throw new Error(
+      `No ${utils.envNames.submitterAddress} env variable specified.`
+    )
   }
 
   const authKey = utils.generateAuthenticationKey()
@@ -15,10 +19,12 @@ async function main() {
     throw new Error(
       // eslint-disable-next-line max-len
       `DID authentication key mnemonic could not be found. Please specify one of the following variables: '${utils.envNames.authMnemonic}', '${utils.envNames.authDerivationPath} depending on the use case.'
-    `)
+    `
+    )
   }
   const assertionKey = utils.generateAttestationKey()
   const delegationKey = utils.generateDelegationKey()
+
   const didUri = utils.generateDidUri()
   if (didUri === undefined) {
     throw new Error(
@@ -36,37 +42,46 @@ async function main() {
         id: '#key',
       },
     ],
-    assertionMethod: assertionKey ? [
-      {
-        ...assertionKey,
-        // Not needed
-        id: '#key2'
-      }
-    ] : undefined,
-    capabilityDelegation: delegationKey ? [
-      {
-        ...delegationKey,
-        // Not needed
-        id: '#key'
-      }
-    ] : undefined,
+    assertionMethod: assertionKey
+      ? [
+          {
+            ...assertionKey,
+            // Not needed
+            id: '#key2',
+          },
+        ]
+      : undefined,
+    capabilityDelegation: delegationKey
+      ? [
+          {
+            ...delegationKey,
+            // Not needed
+            id: '#key',
+          },
+        ]
+      : undefined,
   }
 
   const encodedCall = process.env[utils.envNames.encodedCall]
-
   const decodedCall = api.createType('Call', encodedCall)
   const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
   const extrinsic = api.tx[section][method](...decodedCall.args)
+
   const requiredKey = (() => {
     const requiredKey = Kilt.Did.getKeyRelationshipForTx(extrinsic)
     switch (requiredKey) {
-      case 'authentication': return authKey
-      case 'assertionMethod': return assertionKey
-      case 'capabilityDelegation': return delegationKey
+      case 'authentication':
+        return authKey
+      case 'assertionMethod':
+        return assertionKey
+      case 'capabilityDelegation':
+        return delegationKey
     }
   })()
   if (requiredKey === undefined) {
-    throw new Error('The required DID key to sign the operation is not part of the DID Document. Please add such a key before re-trying.')
+    throw new Error(
+      'The DID key to authorize the operation is not part of the DID Document. Please add such a key before re-trying.'
+    )
   }
   const signedExtrinsic = await Kilt.Did.authorizeTx(
     fullDid.uri,
