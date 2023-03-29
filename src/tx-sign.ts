@@ -1,128 +1,77 @@
-import type { KeypairType } from '@polkadot/util-crypto/types'
-
 import * as Kilt from '@kiltprotocol/sdk-js'
-
-import { Keyring } from '@polkadot/api'
-import { config } from 'dotenv'
 
 import * as utils from './utils'
 
-type EnvConfig = {
-  wsAddress: string
-  submitterAddress: Kilt.KiltAddress
-  didMnemonic: string
-  keyType: KeypairType
-  didUri?: Kilt.DidUri
-  encodedTx: `0x${string}`
-}
-
-function parseEnv(): EnvConfig {
-  config()
-  let wsAddress = process.env.WS_ADDRESS
-  if (!wsAddress) {
-    const defaultWsAddress = utils.defaults.wsAddress
-    console.log(
-      `WS_ADDRESS not specified. Using '${defaultWsAddress}' by default.`
-    )
-    wsAddress = defaultWsAddress
-  }
-
-  const submitterAddress = process.env.SUBMITTER_ADDRESS as Kilt.KiltAddress
-  if (!submitterAddress) {
-    throw `No SUBMITTER_ADDRESS env variable specified.`
-  }
-
-  const didMnemonic = process.env.DID_MNEMONIC
-  if (!didMnemonic) {
-    throw `No DID_MNEMONIC env variable specified.`
-  }
-
-  let keyType = process.env.DID_KEY_TYPE as KeypairType
-  if (!keyType) {
-    const defaultKeyType = utils.defaults.keyType
-    console.log(
-      `DID_KEY_TYPE not specified. Using '${defaultKeyType}' by default.`
-    )
-    keyType = defaultKeyType
-  }
-
-  const encodedTx = process.env.ENCODED_TX as `0x{string}`
-  if (!encodedTx) {
-    throw `No ENCODED_TX env variable specified.`
-  }
-
-  const didUri = process.env.DID_URI as Kilt.DidUri | undefined
-
-  return {
-    submitterAddress,
-    didMnemonic,
-    keyType,
-    didUri,
-    wsAddress,
-    encodedTx,
-  }
-}
-
 async function main() {
-  const {
-    wsAddress,
-    submitterAddress,
-    didMnemonic,
-    keyType,
-    didUri: parsedDidUri,
-    encodedTx,
-  } = parseEnv()
+  const api = await Kilt.connect(utils.readWsAddress())
 
-  const keyring = new Keyring()
-  await Kilt.connect(wsAddress)
-
-  const api = await Kilt.connect(wsAddress)
-  // Use provided seed for all keys
-  const key = keyring.addFromMnemonic(
-    didMnemonic,
-    {},
-    keyType
-  ) as Kilt.KiltKeyringPair
-  let didUri = parsedDidUri
-  if (!didUri) {
-    const defaultDidUri: Kilt.DidUri = Kilt.Did.getFullDidUriFromKey(key)
-    console.log(
-      `DID URI not specified. Using '${defaultDidUri}' as derived from the mnemonic by default.`
-    )
-    didUri = defaultDidUri
+  const submitterAddress = process.env[utils.envNames.submitterAddress] as Kilt.KiltAddress
+  if (submitterAddress === undefined) {
+    throw new Error(`No ${utils.envNames.submitterAddress} env variable specified.`)
   }
+
+  const authKey = utils.generateAuthenticationKey()
+  if (authKey === undefined) {
+    throw new Error(
+      // eslint-disable-next-line max-len
+      `DID authentication key mnemonic could not be found. Please specify one of the following variables: '${utils.envNames.authMnemonic}', '${utils.envNames.authDerivationPath} depending on the use case.'
+    `)
+  }
+  const assertionKey = utils.generateAttestationKey()
+  const delegationKey = utils.generateDelegationKey()
+  const didUri = utils.generateDidUri()
+  if (didUri === undefined) {
+    throw new Error(
+      // eslint-disable-next-line max-len
+      `DID URI could not be parsed. Either specify one with "${utils.envNames.didUri}" or provide the mnemonic for the authentication key, if it has never been changed for the DID.`
+    )
+  }
+
   const fullDid: Kilt.DidDocument = {
     uri: didUri,
     authentication: [
       {
-        ...key,
+        ...authKey,
         // Not needed
-        id: '#key1',
+        id: '#key',
       },
     ],
-    assertionMethod: [
+    assertionMethod: assertionKey ? [
       {
-        ...key,
+        ...assertionKey,
         // Not needed
-        id: '#key2',
-      },
-    ],
-    capabilityDelegation: [
+        id: '#key2'
+      }
+    ] : undefined,
+    capabilityDelegation: delegationKey ? [
       {
-        ...key,
+        ...delegationKey,
         // Not needed
-        id: '#key3',
-      },
-    ],
+        id: '#key'
+      }
+    ] : undefined,
   }
 
-  const decodedCall = api.createType('Call', encodedTx)
+  const encodedCall = process.env[utils.envNames.encodedCall]
+
+  const decodedCall = api.createType('Call', encodedCall)
   const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
   const extrinsic = api.tx[section][method](...decodedCall.args)
+  const requiredKey = (() => {
+    const requiredKey = Kilt.Did.getKeyRelationshipForTx(extrinsic)
+    switch (requiredKey) {
+      case 'authentication': return authKey
+      case 'assertionMethod': return assertionKey
+      case 'capabilityDelegation': return delegationKey
+    }
+  })()
+  if (requiredKey === undefined) {
+    throw new Error('The required DID key to sign the operation is not part of the DID Document. Please add such a key before re-trying.')
+  }
   const signedExtrinsic = await Kilt.Did.authorizeTx(
     fullDid.uri,
     extrinsic,
-    utils.getKeypairTxSigningCallback(key),
+    utils.getKeypairTxSigningCallback(requiredKey),
     submitterAddress
   )
 

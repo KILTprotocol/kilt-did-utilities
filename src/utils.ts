@@ -1,10 +1,13 @@
 import type { KeypairType } from '@polkadot/util-crypto/types'
 
+import { Keyring } from '@polkadot/api'
+
 import * as Kilt from '@kiltprotocol/sdk-js'
 
 export const envNames = {
   wsAddress: 'WS_ADDRESS',
   submitterAddress: 'SUBMITTER_ADDRESS',
+  didUri: 'DID_URI',
   didMnemonic: 'DID_MNEMONIC',
   authMnemonic: 'AUTH_MNEMONIC',
   authDerivationPath: 'AUTH_DERIVATION_PATH',
@@ -15,9 +18,15 @@ export const envNames = {
   delMnemonic: 'DEL_MNEMONIC',
   delDerivationPath: 'DEL_DERIVATION_PATH',
   delKeyType: 'DEL_KEY_TYPE',
+  linkedAccount: 'LINKED_ACCOUNT',
+  serviceId: 'SERVICE_ID',
+  serviceType: 'SERVICE_TYPE',
+  serviceEndpoint: 'SERVICE_ENDPOINT',
+  web3Name: 'WEB3_NAME',
+  encodedCall: 'ENCODED_CALL'
 }
 
-export type Defaults = {
+type Defaults = {
   wsAddress: string
   authDerivationPath: string
   authKeyType: KeypairType
@@ -57,14 +66,25 @@ export function getKeypairTxSigningCallback(
   })
 }
 
-export function readAuthenticationKeyMnemonic(): string | undefined {
+export function readWsAddress(): string {
+  let wsAddress = process.env[envNames.wsAddress]
+  if (wsAddress === undefined) {
+    console.log(
+      `${envNames.wsAddress} not specified. Using '${defaults.wsAddress}' by default.`
+    )
+    wsAddress = defaults.wsAddress
+  }
+  return wsAddress
+}
+
+function readAuthenticationKeyMnemonic(): string | undefined {
   // Return the mnemonic directly, if specified
   if (process.env[envNames.authMnemonic] !== undefined) {
-    return process.env[envNames.authMnemonic] as string
+    return process.env[envNames.authMnemonic]
     // Otherwise use the derivation path on the basic mnemonic, if specified
   } else if (
-    process.env[envNames.authDerivationPath] !== undefined &&
-    process.env[envNames.didMnemonic] !== undefined
+    process.env[envNames.didMnemonic] !== undefined &&
+    process.env[envNames.authDerivationPath] !== undefined
   ) {
     const baseMnemonic = process.env[envNames.didMnemonic] as string
     return baseMnemonic.concat(process.env[envNames.authDerivationPath] as string)
@@ -72,15 +92,27 @@ export function readAuthenticationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
+export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
+  const authKeyMnemonic = readAuthenticationKeyMnemonic()
+  const authKeyType =
+    authKeyMnemonic === undefined
+      ? undefined
+      : process.env[envNames.authKeyType] as KeypairType || defaults.authKeyType
+  if (authKeyMnemonic !== undefined) {
+    return new Keyring().addFromMnemonic(authKeyMnemonic, {}, authKeyType) as Kilt.KiltKeyringPair
+  } else {
+    return undefined
+  }
+}
 
-export function readAttestationKeyMnemonic(): string | undefined {
+function readAttestationKeyMnemonic(): string | undefined {
   // Return the mnemonic directly, if specified
   if (process.env[envNames.attMnemonic] !== undefined) {
-    return process.env[envNames.attMnemonic] as string
+    return process.env[envNames.attMnemonic]
     // Otherwise use the derivation path on the basic mnemonic, if specified
   } else if (
-    process.env[envNames.attDerivationPath] !== undefined &&
-    process.env[envNames.didMnemonic] !== undefined
+    process.env[envNames.didMnemonic] !== undefined &&
+    process.env[envNames.attDerivationPath] !== undefined
   ) {
     const baseMnemonic = process.env[envNames.didMnemonic] as string
     return baseMnemonic.concat(process.env[envNames.attDerivationPath] as string)
@@ -88,19 +120,60 @@ export function readAttestationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
+export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
+  const attKeyMnemonic = readAttestationKeyMnemonic()
+  const attKeyType =
+    attKeyMnemonic === undefined
+      ? undefined
+      : process.env[envNames.attKeyType] as KeypairType || defaults.attKeyType
+  if (attKeyMnemonic !== undefined) {
+    return new Keyring().addFromMnemonic(attKeyMnemonic, {}, attKeyType) as Kilt.KiltKeyringPair
+  } else {
+    return undefined
+  }
+}
 
-export function readDelegationKeyMnemonic(): string | undefined {
+function readDelegationKeyMnemonic(): string | undefined {
   // Return the mnemonic directly, if specified
   if (process.env[envNames.delMnemonic] !== undefined) {
-    return process.env[envNames.delMnemonic] as string
+    return process.env[envNames.delMnemonic]
     // Otherwise use the derivation path on the basic mnemonic, if specified
   } else if (
-    process.env[envNames.delDerivationPath] !== undefined &&
-    process.env[envNames.didMnemonic] !== undefined
+    process.env[envNames.didMnemonic] !== undefined &&
+    process.env[envNames.delDerivationPath] !== undefined
   ) {
     const baseMnemonic = process.env[envNames.didMnemonic] as string
     return baseMnemonic.concat(process.env[envNames.delDerivationPath] as string)
   } else {
     return undefined
+  }
+}
+export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
+  const delKeyMnemonic = readDelegationKeyMnemonic()
+  const delKeyType =
+    delKeyMnemonic === undefined
+      ? undefined
+      : process.env[envNames.delKeyType] as KeypairType || defaults.delKeyType
+  if (delKeyMnemonic !== undefined) {
+    return new Keyring().addFromMnemonic(delKeyMnemonic, {}, delKeyType) as Kilt.KiltKeyringPair
+  } else {
+    return undefined
+  }
+}
+
+export function generateDidUri(): Kilt.DidUri | undefined {
+  const parsedUri = process.env[envNames.didUri] as Kilt.DidUri
+  if (parsedUri !== undefined) {
+    console.log(`Using the provided DID URI for the operation: ${parsedUri}.`)
+    return parsedUri
+  } else {
+    const authKey = generateAuthenticationKey()
+    if (authKey !== undefined) {
+      const derivedUri = Kilt.Did.getFullDidUriFromKey(authKey)
+      console.log(`Deriving the DID URI from the provided authentication key mnemonic: ${derivedUri}`)
+      return derivedUri
+    } else {
+      return undefined
+    }
   }
 }
