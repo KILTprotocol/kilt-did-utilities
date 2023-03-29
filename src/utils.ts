@@ -10,6 +10,9 @@ export const envNames = {
   authMnemonic: 'AUTH_MNEMONIC',
   authDerivationPath: 'AUTH_DERIVATION_PATH',
   authKeyType: 'AUTH_KEY_TYPE',
+  newAuthMnemonic: 'NEW_AUTH_MNEMONIC',
+  newAuthDerivationPath: 'NEW_AUTH_DERIVATION_PATH',
+  newAuthKeyType: 'NEW_AUTH_KEY_TYPE',
   attMnemonic: 'ATT_MNEMONIC',
   attDerivationPath: 'ATT_DERIVATION_PATH',
   attKeyType: 'ATT_KEY_TYPE',
@@ -87,7 +90,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -122,7 +125,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.attKeyType
+      defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -157,7 +160,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.delKeyType
+      defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -185,5 +188,40 @@ export function generateDidUri(): Kilt.DidUri | undefined {
     } else {
       return undefined
     }
+  }
+}
+
+function readNewAuthenticationKeyMnemonic(): string | undefined {
+  // Return the mnemonic directly, if specified
+  if (process.env[envNames.newAuthMnemonic] !== undefined) {
+    return process.env[envNames.newAuthMnemonic]
+    // Otherwise use the derivation path on the basic mnemonic, if specified
+  } else if (
+    process.env[envNames.didMnemonic] !== undefined &&
+    process.env[envNames.newAuthDerivationPath] !== undefined
+  ) {
+    const baseMnemonic = process.env[envNames.didMnemonic] as string
+    return baseMnemonic.concat(
+      process.env[envNames.newAuthDerivationPath] as string
+    )
+  } else {
+    return undefined
+  }
+}
+export function generateNewAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
+  const authKeyMnemonic = readNewAuthenticationKeyMnemonic()
+  const authKeyType =
+    authKeyMnemonic === undefined
+      ? undefined
+      : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
+      defaults.authKeyType
+  if (authKeyMnemonic !== undefined) {
+    return new Keyring().addFromMnemonic(
+      authKeyMnemonic,
+      {},
+      authKeyType
+    ) as Kilt.KiltKeyringPair
+  } else {
+    return undefined
   }
 }

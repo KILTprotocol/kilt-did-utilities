@@ -58,5 +58,14 @@ If a call requires a DID assertion method key, either `ATT_MNEMONIC` or `DID_MNE
 
 To run this script, execute `yarn call-authorize` and then copy the HEX-encoded operation to be submitted via [PolkadotJS Apps][polkadot-apps] in `Developer > Extrinsics > Decode`, using the account specified in `SUBMITTER_ADDRESS`.
 
-[sporran-github]: https://github.com/BTE-Trusted-Entity/sporran-extension
+## Change a DID key
+
+There are scripts to change each of the keys of a DID:
+
+- `yarn auth-key-set` changes the current DID authentication key with the new one derived from either `NEW_AUTH_MNEMONIC` or `NEW_AUTH_DERIVATION_PATH`
+- `yarn att-key-set` changes the current DID assertion method key with a new one derived from either `ATT_MNEMONIC` OR `ATT_DERIVATION_PATH`
+- `yarn del-key-set` changes the current DID capability delegation key with a new one derived from either `DEL_MNEMONIC` OR `DEL_DERIVATION_PATH`
+
+Since all operations require a DID signature generated from the current authentication key, `AUTH_MNEMONIC` or `DID_MNEMONIC` and `AUTH_DERIVATION_PATH` must still be specified to re-construct the key required to sign the operation.
+
 [polkadot-apps]: (https://polkadot.js.org/apps/#/)

@@ -2,6 +2,9 @@
   "name": "kilt-did-utilities",
   "license": "MIT",
   "scripts": {
+    "auth-key-set": "ts-node src/auth-key-set.ts",
+    "att-key-set": "ts-node src/att-key-set.ts",
+    "del-key-set": "ts-node src/del-key-set.ts",
     "did-create": "ts-node src/did-create.ts",
     "call-authorize": "ts-node src/tx-sign",
     "check-ts": "tsc src/** --skipLibCheck --noEmit",

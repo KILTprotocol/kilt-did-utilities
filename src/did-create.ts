@@ -14,7 +14,7 @@ async function main() {
   ] as Kilt.KiltAddress
   if (submitterAddress === undefined) {
     throw new Error(
-      `No ${utils.envNames.submitterAddress} env variable specified.`
+      `No "${utils.envNames.submitterAddress}" env variable specified.`
     )
   }
 
@@ -23,7 +23,7 @@ async function main() {
     process.env[utils.envNames.authMnemonic] === undefined
   ) {
     console.log(
-      `${utils.envNames.didMnemonic} not specified. Generating a random one...`
+      `"${utils.envNames.didMnemonic}" not specified. Generating a random one...`
     )
     const mnemonic = mnemonicGenerate()
     process.env[utils.envNames.didMnemonic] = mnemonic
@@ -34,8 +34,7 @@ async function main() {
   if (authKey === undefined) {
     throw new Error(
       // eslint-disable-next-line max-len
-      `DID authentication key mnemonic could not be found. Please specify one of the following variables: '${utils.envNames.authMnemonic}', '${utils.envNames.authDerivationPath} depending on the use case.'
-    `
+      `DID authentication key mnemonic could not be found. Please specify one of the following variables: "${utils.envNames.authMnemonic}", "${utils.envNames.authDerivationPath}" depending on the use case.`
     )
   }
   const assertionKey = utils.generateAttestationKey()

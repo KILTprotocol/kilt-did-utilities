@@ -12,7 +12,7 @@ async function main() {
   ] as Kilt.KiltAddress
   if (submitterAddress === undefined) {
     throw new Error(
-      `No ${utils.envNames.submitterAddress} env variable specified.`
+      `No "${utils.envNames.submitterAddress}" env variable specified.`
     )
   }
 
@@ -42,21 +42,21 @@ async function main() {
     ],
     assertionMethod: assertionKey
       ? [
-          {
-            ...assertionKey,
-            // Not needed
-            id: '#key2',
-          },
-        ]
+        {
+          ...assertionKey,
+          // Not needed
+          id: '#key2',
+        },
+      ]
       : undefined,
     capabilityDelegation: delegationKey
       ? [
-          {
-            ...delegationKey,
-            // Not needed
-            id: '#key3',
-          },
-        ]
+        {
+          ...delegationKey,
+          // Not needed
+          id: '#key3',
+        },
+      ]
       : undefined,
   }
 
@@ -90,7 +90,8 @@ async function main() {
 
   const encodedOperation = signedExtrinsic.toHex()
   console.log(
-    `Encoded DID-authorized operation: ${encodedOperation}. Please submit this via PolkadotJS with the account provided here.`
+    // eslint-disable-next-line max-len
+    `Encoded DID-authorized operation: ${encodedOperation}. Please submit this via PolkadotJS with the account that was provided: ${submitterAddress}.`
   )
 }
 
