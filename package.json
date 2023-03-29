@@ -9,6 +9,7 @@
     "endpoint-remove": "ts-node src/endpoint-remove.ts",
     "tx-sign": "ts-node src/tx-sign",
     "web3name-claim": "ts-node src/web3name-claim.ts",
+    "check-ts": "tsc src/** --skipLibCheck --noEmit",
     "lint": "eslint . --ext .ts --format=codeframe",
     "lint:fix": "yarn lint --fix",
     "style": "prettier --check --config .prettierrc '**/*.ts'",
