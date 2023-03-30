@@ -44,7 +44,7 @@ Once the right call (i.e., the right pallet and right method) with the right par
 The following env variables are required:
 
 - `SUBMITTER_ADDRESS`: The KILT address (encoded with the KILT network prefix `38`) that is authorized to submit the transaction.
-- `ENCODED_TX`: The HEX-encoded call to DID-sign.
+- `ENCODED_CALL`: The HEX-encoded call to DID-sign.
 - `DID_URI`: The URI of the DID authorizing the operation
 
 The following optional env variables can be passed:
