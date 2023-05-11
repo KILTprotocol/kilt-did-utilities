@@ -6,6 +6,7 @@
     "att-key-set": "ts-node src/att-key-set.ts",
     "del-key-set": "ts-node src/del-key-set.ts",
     "did-create": "ts-node src/did-create.ts",
+    "dip-sign": "ts-node src/dip-sign.ts",
     "call-authorize": "ts-node src/call-sign",
     "check-ts": "tsc src/** --skipLibCheck --noEmit",
     "lint": "eslint . --ext .ts --format=codeframe",

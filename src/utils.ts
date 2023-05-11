@@ -1,4 +1,8 @@
-import { Keyring } from '@polkadot/api'
+import type { BN } from '@polkadot/util'
+import type { Extrinsic } from '@polkadot/types/interfaces'
+
+import { ApiPromise, Keyring } from '@polkadot/api'
+import { KeyringPair } from '@polkadot/keyring/types'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 
@@ -20,6 +24,8 @@ export const envNames = {
   delDerivationPath: 'DEL_DERIVATION_PATH',
   delKeyType: 'DEL_KEY_TYPE',
   encodedCall: 'ENCODED_CALL',
+  consumerWsAddress: 'CONSUMER_WS_ADDRESS',
+  verificationMethod: 'VERIFICATION_METHOD',
 }
 
 type Defaults = {
@@ -90,7 +96,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -125,7 +131,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.attKeyType
+      defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -160,7 +166,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.delKeyType
+      defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -197,7 +203,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -207,6 +213,47 @@ export function generateNewAuthenticationKey():
   } else {
     return undefined
   }
+}
+
+const validValues: Set<Kilt.VerificationKeyRelationship> = new Set(['authentication', 'assertionMethod', 'capabilityDelegation'])
+export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
+  const verificationMethod = process.env[envNames.verificationMethod]
+  if (verificationMethod === undefined) {
+    throw new Error(`No ${envNames.verificationMethod} env variable specified.`)
+  }
+  const castedVerificationMethod = verificationMethod as Kilt.VerificationKeyRelationship
+  if (validValues.has(castedVerificationMethod)) {
+    return castedVerificationMethod
+  } else {
+    throw new Error(`Provided value for ${envNames.verificationMethod} does not match any of the expected values: ${validValues}.`)
+  }
+}
+
+export async function generateDipTxSignature(
+  api: ApiPromise,
+  did: Kilt.DidUri,
+  call: Extrinsic,
+  submitterAccount: KeyringPair['address'],
+  keyRelationship: Kilt.VerificationKeyRelationship,
+  sign: Kilt.SignExtrinsicCallback,
+  encodedSignedExtra: Uint8Array = new Uint8Array(),
+): Promise<[Kilt.Did.EncodedSignature, BN]> {
+  // Assumed to be a u64
+  const blockNumber = await api.query.system.number()
+  // Assumed to be a Hash
+  const genesisHash = await api.query.system.blockHash(0)
+  // TODO: This might not exist, and hence fail
+  // Assumed to be a u128
+  const identityDetails = await api.query.dipConsumer.identityProofs(Kilt.Did.toChain(did))
+  const signaturePayload =
+    api.createType(
+      '(Call, u128, AccountId32, u64, Hash, Bytes)',
+      [call, identityDetails, submitterAccount, blockNumber, genesisHash, encodedSignedExtra]
+    ).toU8a()
+  const signature = await sign({ data: signaturePayload, keyRelationship, did })
+  return [{
+    [signature.keyType]: signature.signature
+  } as Kilt.Did.EncodedSignature, blockNumber.toBn()]
 }
 
 export function generatePolkadotJSLink(
