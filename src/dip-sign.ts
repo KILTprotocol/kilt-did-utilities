@@ -12,7 +12,9 @@ async function main() {
       `No ${utils.envNames.consumerWsAddress} env variable specified.`
     )
   }
-  const api = await ApiPromise.create({ provider: new WsProvider(consumerWsAddress) })
+  const api = await ApiPromise.create({
+    provider: new WsProvider(consumerWsAddress),
+  })
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
@@ -54,19 +56,22 @@ async function main() {
       'The DID key to authorize the operation is not part of the DID Document. Please add such a key before re-trying.'
     )
   }
-  const [dipSignature, blockNumber] =
-    await utils.generateDipTxSignature(
-      api,
-      didUri,
-      decodedCall,
-      submitterAddress,
-      verificationMethod,
-      utils.getKeypairTxSigningCallback(requiredKey),
-    )
+  const [dipSignature, blockNumber] = await utils.generateDipTxSignature(
+    api,
+    didUri,
+    decodedCall,
+    submitterAddress,
+    verificationMethod,
+    utils.getKeypairTxSigningCallback(requiredKey)
+  )
 
   console.log(
     `
-    DID signature for submission via DIP: ${JSON.stringify(utils.hexifyDipSignature(dipSignature), null, 2)}.
+    DID signature for submission via DIP: ${JSON.stringify(
+      utils.hexifyDipSignature(dipSignature),
+      null,
+      2
+    )}.
     Block number used for signature generation: ${blockNumber.toString()}.
     Please add these details to the "dipConsumer.dispatchAs" function in PolkadotJS.
     `
