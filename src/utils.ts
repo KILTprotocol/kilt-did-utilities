@@ -28,7 +28,7 @@ export const envNames = {
   consumerWsAddress: 'CONSUMER_WS_ADDRESS',
   verificationMethod: 'VERIFICATION_METHOD',
   identityDetailsType: 'IDENTITY_DETAILS',
-  accountIdType: 'ACCOUNT_ID'
+  accountIdType: 'ACCOUNT_ID',
 }
 
 type Defaults = {
@@ -36,7 +36,7 @@ type Defaults = {
   authKeyType: Kilt.KeyringPair['type']
   attKeyType: Kilt.KeyringPair['type']
   delKeyType: Kilt.KeyringPair['type']
-  identityDetailsType: string,
+  identityDetailsType: string
   accountIdType: string
 }
 
@@ -46,7 +46,7 @@ export const defaults: Defaults = {
   attKeyType: 'sr25519',
   delKeyType: 'sr25519',
   identityDetailsType: 'u128',
-  accountIdType: 'AccountId32'
+  accountIdType: 'AccountId32',
 }
 
 export function getKeypairSigningCallback(
@@ -103,7 +103,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -138,7 +138,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.attKeyType
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -173,7 +173,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.delKeyType
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -210,7 +210,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -222,17 +222,24 @@ export function generateNewAuthenticationKey():
   }
 }
 
-const validValues: Set<Kilt.VerificationKeyRelationship> = new Set(['authentication', 'assertionMethod', 'capabilityDelegation'])
+const validValues: Set<Kilt.VerificationKeyRelationship> = new Set([
+  'authentication',
+  'assertionMethod',
+  'capabilityDelegation',
+])
 export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
   const verificationMethod = process.env[envNames.verificationMethod]
   if (verificationMethod === undefined) {
     throw new Error(`No ${envNames.verificationMethod} env variable specified.`)
   }
-  const castedVerificationMethod = verificationMethod as Kilt.VerificationKeyRelationship
+  const castedVerificationMethod =
+    verificationMethod as Kilt.VerificationKeyRelationship
   if (validValues.has(castedVerificationMethod)) {
     return castedVerificationMethod
   } else {
-    throw new Error(`Provided value for ${envNames.verificationMethod} does not match any of the expected values: ${validValues}.`)
+    throw new Error(
+      `Provided value for ${envNames.verificationMethod} does not match any of the expected values: ${validValues}.`
+    )
   }
 }
 
@@ -242,7 +249,7 @@ export async function generateDipTxSignature(
   call: Call,
   submitterAccount: KeyringPair['address'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
-  sign: Kilt.SignExtrinsicCallback,
+  sign: Kilt.SignExtrinsicCallback
 ): Promise<[Kilt.Did.EncodedSignature, BN]> {
   const isDipCapable = api.tx.dipConsumer.dispatchAs !== undefined
   if (!isDipCapable) {
@@ -252,32 +259,52 @@ export async function generateDipTxSignature(
   console.log(`DIP signature targeting block number: ${blockNumber.toHuman()}`)
   const genesisHash = await api.query.system.blockHash(0)
   console.log(`DIP consumer genesis hash: ${genesisHash.toHuman()}`)
-  const identityDetails = await api.query.dipConsumer.identityProofs(Kilt.Did.toChain(did))
-  const identityDetailsType = process.env[envNames.identityDetailsType] ?? defaults.identityDetailsType
-  console.log(
-    `DIP subject identity details on consumer chain: ${JSON.stringify(identityDetails, null, 2)} with runtime type "${identityDetailsType}"`
+  const identityDetails = await api.query.dipConsumer.identityProofs(
+    Kilt.Did.toChain(did)
   )
-  const accountIdType = process.env[envNames.accountIdType] ?? defaults.accountIdType
+  const identityDetailsType =
+    process.env[envNames.identityDetailsType] ?? defaults.identityDetailsType
   console.log(
-    `DIP AccountId runtime type: "${accountIdType}"`
+    `DIP subject identity details on consumer chain: ${JSON.stringify(
+      identityDetails,
+      null,
+      2
+    )} with runtime type "${identityDetailsType}"`
   )
-  const signaturePayload =
-    api.createType(
+  const accountIdType =
+    process.env[envNames.accountIdType] ?? defaults.accountIdType
+  console.log(`DIP AccountId runtime type: "${accountIdType}"`)
+  const signaturePayload = api
+    .createType(
       `(Call, ${identityDetailsType}, ${accountIdType}, BlockNumber, Hash)`,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [call, (identityDetails as any).details, submitterAccount, blockNumber, genesisHash]
-    ).toU8a()
+      [
+        call,
+        (identityDetails as any).details,
+        submitterAccount,
+        blockNumber,
+        genesisHash,
+      ]
+    )
+    .toU8a()
   console.log(`Encoded payload for signing: ${u8aToHex(signaturePayload)}`)
-  const signature = await sign({ data: signaturePayload, keyRelationship: didKeyRelationship, did })
-  return [{
-    [signature.keyType]: signature.signature
-  } as Kilt.Did.EncodedSignature, blockNumber.toBn()]
+  const signature = await sign({
+    data: signaturePayload,
+    keyRelationship: didKeyRelationship,
+    did,
+  })
+  return [
+    {
+      [signature.keyType]: signature.signature,
+    } as Kilt.Did.EncodedSignature,
+    blockNumber.toBn(),
+  ]
 }
 
 export function hexifyDipSignature(signature: Kilt.Did.EncodedSignature) {
   const [signatureType, byteSignature] = Object.entries(signature)[0]
   const hexifiedSignature = {
-    [signatureType]: u8aToHex(byteSignature)
+    [signatureType]: u8aToHex(byteSignature),
   }
   return hexifiedSignature
 }
