@@ -1,8 +1,9 @@
 import type { BN } from '@polkadot/util'
-import type { Extrinsic } from '@polkadot/types/interfaces'
+import type { Call } from '@polkadot/types/interfaces'
 
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { u8aToHex } from '@polkadot/util'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 
@@ -26,6 +27,8 @@ export const envNames = {
   encodedCall: 'ENCODED_CALL',
   consumerWsAddress: 'CONSUMER_WS_ADDRESS',
   verificationMethod: 'VERIFICATION_METHOD',
+  identityDetailsType: 'IDENTITY_DETAILS',
+  accountIdType: 'ACCOUNT_ID'
 }
 
 type Defaults = {
@@ -33,6 +36,8 @@ type Defaults = {
   authKeyType: Kilt.KeyringPair['type']
   attKeyType: Kilt.KeyringPair['type']
   delKeyType: Kilt.KeyringPair['type']
+  identityDetailsType: string,
+  accountIdType: string
 }
 
 export const defaults: Defaults = {
@@ -40,6 +45,8 @@ export const defaults: Defaults = {
   authKeyType: 'sr25519',
   attKeyType: 'sr25519',
   delKeyType: 'sr25519',
+  identityDetailsType: 'u128',
+  accountIdType: 'AccountId32'
 }
 
 export function getKeypairSigningCallback(
@@ -232,26 +239,45 @@ export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
 export async function generateDipTxSignature(
   api: ApiPromise,
   did: Kilt.DidUri,
-  call: Extrinsic,
+  call: Call,
   submitterAccount: KeyringPair['address'],
-  keyRelationship: Kilt.VerificationKeyRelationship,
+  didKeyRelationship: Kilt.VerificationKeyRelationship,
   sign: Kilt.SignExtrinsicCallback,
-  encodedSignedExtra: Uint8Array = new Uint8Array(),
 ): Promise<[Kilt.Did.EncodedSignature, BN]> {
-  // Assumed to be a u64
+  const isDipCapable = api.tx.dipConsumer.dispatchAs !== undefined
+  if (!isDipCapable) {
+    throw new Error(`The target chain at does not seem to support DIP.`)
+  }
   const blockNumber = await api.query.system.number()
-  // Assumed to be a Hash
+  console.log(`DIP signature targeting block number: ${blockNumber.toHuman()}`)
   const genesisHash = await api.query.system.blockHash(0)
-  // TODO: This might not exist, and hence fail
-  // Assumed to be a u128
+  console.log(`DIP consumer genesis hash: ${genesisHash.toHuman()}`)
   const identityDetails = await api.query.dipConsumer.identityProofs(Kilt.Did.toChain(did))
+  const identityDetailsType = process.env[envNames.identityDetailsType] ?? defaults.identityDetailsType
+  console.log(
+    `DIP subject identity details on consumer chain: ${JSON.stringify(identityDetails, null, 2)} with runtime type "${identityDetailsType}"`
+  )
+  const accountIdType = process.env[envNames.accountIdType] ?? defaults.accountIdType
+  console.log(
+    `DIP AccountId runtime type: "${accountIdType}"`
+  )
   const signaturePayload =
     api.createType(
-      '(Call, u128, AccountId32, u64, Hash, Bytes)',
-      [call, identityDetails, submitterAccount, blockNumber, genesisHash, encodedSignedExtra]
+      `(Call, ${identityDetailsType}, ${accountIdType}, BlockNumber, Hash)`,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [call, (identityDetails as any).details, submitterAccount, blockNumber, genesisHash]
     ).toU8a()
-  const signature = await sign({ data: signaturePayload, keyRelationship, did })
+  console.log(`Encoded payload for signing: ${u8aToHex(signaturePayload)}`)
+  const signature = await sign({ data: signaturePayload, keyRelationship: didKeyRelationship, did })
   return [{
     [signature.keyType]: signature.signature
   } as Kilt.Did.EncodedSignature, blockNumber.toBn()]
+}
+
+export function hexifyDipSignature(signature: Kilt.Did.EncodedSignature) {
+  const [signatureType, byteSignature] = Object.entries(signature)[0]
+  const hexifiedSignature = {
+    [signatureType]: u8aToHex(byteSignature)
+  }
+  return hexifiedSignature
 }

@@ -37,8 +37,6 @@ async function main() {
 
   const encodedCall = process.env[utils.envNames.encodedCall]
   const decodedCall = api.createType('Call', encodedCall)
-  const { method, section } = api.registry.findMetaCall(decodedCall.callIndex)
-  const extrinsic = api.tx[section][method](...decodedCall.args)
 
   const [requiredKey, verificationMethod] = (() => {
     const providedMethod = utils.parseVerificationMethod()
@@ -60,16 +58,17 @@ async function main() {
     await utils.generateDipTxSignature(
       api,
       didUri,
-      extrinsic,
+      decodedCall,
       submitterAddress,
       verificationMethod,
-      utils.getKeypairTxSigningCallback(requiredKey)
+      utils.getKeypairTxSigningCallback(requiredKey),
     )
 
   console.log(
     `
-    DID signature for submission via DIP: ${JSON.stringify(dipSignature, null, 2)}.
-    Block number used for signature generation: ${blockNumber.toString()}
+    DID signature for submission via DIP: ${JSON.stringify(utils.hexifyDipSignature(dipSignature), null, 2)}.
+    Block number used for signature generation: ${blockNumber.toString()}.
+    Please add these details to the "dipConsumer.dispatchAs" function in PolkadotJS.
     `
   )
 }
