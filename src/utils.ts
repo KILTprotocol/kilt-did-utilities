@@ -259,7 +259,7 @@ export async function generateDipTxSignature(
   console.log(`DIP signature targeting block number: ${blockNumber.toHuman()}`)
   const genesisHash = await api.query.system.blockHash(0)
   console.log(`DIP consumer genesis hash: ${genesisHash.toHuman()}`)
-  const identityDetails = await api.query.dipConsumer.identityProofs(
+  const identityDetails = await api.query.dipConsumer.identityEntries(
     Kilt.Did.toChain(did)
   )
   const identityDetailsType =
