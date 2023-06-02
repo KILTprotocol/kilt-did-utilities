@@ -64,6 +64,13 @@ async function main() {
   const extrinsic = api.tx[section][method](...decodedCall.args)
 
   const requiredKey = (() => {
+    // TODO: Remove this once the SDK supports this new pallet calls
+    if (
+      extrinsic.method.section === 'dipProvider' &&
+      extrinsic.method.method === 'commitIdentity'
+    ) {
+      return authKey
+    }
     const requiredKey = Kilt.Did.getKeyRelationshipForTx(extrinsic)
     switch (requiredKey) {
       case 'authentication':
