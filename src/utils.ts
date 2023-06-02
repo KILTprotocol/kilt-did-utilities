@@ -277,9 +277,9 @@ export async function generateDipTxSignature(
   const signaturePayload = api
     .createType(
       `(Call, ${identityDetailsType}, ${accountIdType}, BlockNumber, Hash)`,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [
         call,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (identityDetails as any).details,
         submitterAccount,
         blockNumber,
