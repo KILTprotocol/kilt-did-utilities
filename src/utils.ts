@@ -29,6 +29,7 @@ export const envNames = {
   verificationMethod: 'VERIFICATION_METHOD',
   identityDetailsType: 'IDENTITY_DETAILS',
   accountIdType: 'ACCOUNT_ID',
+  blockNumberType: 'BLOCK_NUMBER',
 }
 
 type Defaults = {
@@ -38,6 +39,7 @@ type Defaults = {
   delKeyType: Kilt.KeyringPair['type']
   identityDetailsType: string
   accountIdType: string
+  blockNumberType: string
 }
 
 export const defaults: Defaults = {
@@ -47,6 +49,7 @@ export const defaults: Defaults = {
   delKeyType: 'sr25519',
   identityDetailsType: 'u128',
   accountIdType: 'AccountId32',
+  blockNumberType: 'u64',
 }
 
 export function getKeypairSigningCallback(
@@ -274,13 +277,16 @@ export async function generateDipTxSignature(
   const accountIdType =
     process.env[envNames.accountIdType] ?? defaults.accountIdType
   console.log(`DIP AccountId runtime type: "${accountIdType}"`)
+  const blockNumberType =
+    process.env[envNames.blockNumberType] ?? defaults.blockNumberType
+  console.log(`Block number runtime type: "${blockNumberType}"`)
   const signaturePayload = api
     .createType(
-      `(Call, ${identityDetailsType}, ${accountIdType}, BlockNumber, Hash)`,
+      `(Call, ${identityDetailsType}, ${accountIdType}, ${blockNumberType}, Hash)`,
       [
         call,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (identityDetails as any).details,
+        (identityDetails.toJSON() as any).details,
         submitterAccount,
         blockNumber,
         genesisHash,
