@@ -40,21 +40,21 @@ async function main() {
     ],
     assertionMethod: assertionKey
       ? [
-        {
-          ...assertionKey,
-          // Not needed
-          id: '#key2',
-        },
-      ]
+          {
+            ...assertionKey,
+            // Not needed
+            id: '#key2',
+          },
+        ]
       : undefined,
     capabilityDelegation: delegationKey
       ? [
-        {
-          ...delegationKey,
-          // Not needed
-          id: '#key3',
-        },
-      ]
+          {
+            ...delegationKey,
+            // Not needed
+            id: '#key3',
+          },
+        ]
       : undefined,
   }
 
