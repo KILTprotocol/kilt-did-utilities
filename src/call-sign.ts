@@ -40,21 +40,21 @@ async function main() {
     ],
     assertionMethod: assertionKey
       ? [
-          {
-            ...assertionKey,
-            // Not needed
-            id: '#key2',
-          },
-        ]
+        {
+          ...assertionKey,
+          // Not needed
+          id: '#key2',
+        },
+      ]
       : undefined,
     capabilityDelegation: delegationKey
       ? [
-          {
-            ...delegationKey,
-            // Not needed
-            id: '#key3',
-          },
-        ]
+        {
+          ...delegationKey,
+          // Not needed
+          id: '#key3',
+        },
+      ]
       : undefined,
   }
 
@@ -64,13 +64,6 @@ async function main() {
   const extrinsic = api.tx[section][method](...decodedCall.args)
 
   const requiredKey = (() => {
-    // TODO: Remove this once the SDK supports this new pallet calls
-    if (
-      extrinsic.method.section === 'dipProvider' &&
-      extrinsic.method.method === 'commitIdentity'
-    ) {
-      return authKey
-    }
     const requiredKey = Kilt.Did.getKeyRelationshipForTx(extrinsic)
     switch (requiredKey) {
       case 'authentication':

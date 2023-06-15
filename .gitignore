@@ -1,5 +1,5 @@
 .env
 yarn-error.log
-
+.yarn
 node_modules
 out
