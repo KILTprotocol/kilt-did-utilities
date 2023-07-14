@@ -56,23 +56,20 @@ async function main() {
       'The DID key to authorize the operation is not part of the DID Document. Please add such a key before re-trying.'
     )
   }
-  const [dipSignature, blockNumber] = await utils.generateDipTxSignature(
-    api,
-    didUri,
-    decodedCall,
-    submitterAddress,
-    verificationMethod,
-    utils.getKeypairTxSigningCallback(requiredKey)
-  )
+
+  const tx =
+    await utils.generateDipTx(
+      api,
+      didUri,
+      decodedCall,
+      submitterAddress,
+      verificationMethod,
+      utils.getKeypairTxSigningCallback(requiredKey)
+    )
 
   console.log(
     `
-    DID signature for submission via DIP: ${JSON.stringify(
-      utils.hexifyDipSignature(dipSignature),
-      null,
-      2
-    )}.
-    Block number used for signature generation: ${blockNumber.toString()}.
+    DIP tx: ${tx.toHex()}.
     Please add these details to the "dipConsumer.dispatchAs" function in PolkadotJS.
     `
   )
