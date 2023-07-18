@@ -2,19 +2,30 @@ import 'dotenv/config'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
+import { blake2AsHex } from '@polkadot/util-crypto'
 
 import * as utils from './utils'
 
 async function main() {
+  const relayWsAddress = process.env[utils.envNames.relayWsAddress]
+  const providerWsAddress = process.env[utils.envNames.providerWsAddress]
   const consumerWsAddress = process.env[utils.envNames.consumerWsAddress]
+  if (relayWsAddress === undefined) {
+    throw new Error(
+      `No ${utils.envNames.relayWsAddress} env variable specified.`
+    )
+  }
+  if (providerWsAddress === undefined) {
+    throw new Error(
+      `No ${utils.envNames.providerWsAddress} env variable specified.`
+    )
+  }
   if (consumerWsAddress === undefined) {
     throw new Error(
       `No ${utils.envNames.consumerWsAddress} env variable specified.`
     )
   }
-  const api = await ApiPromise.create({
-    provider: new WsProvider(consumerWsAddress),
-  })
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
@@ -37,8 +48,12 @@ async function main() {
     throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }
 
+  const consumerApi = await ApiPromise.create({
+    provider: new WsProvider(consumerWsAddress),
+  })
+
   const encodedCall = process.env[utils.envNames.encodedCall]
-  const decodedCall = api.createType('Call', encodedCall)
+  const decodedCall = consumerApi.createType('Call', encodedCall)
 
   const [requiredKey, verificationMethod] = (() => {
     const providedMethod = utils.parseVerificationMethod()
@@ -57,15 +72,23 @@ async function main() {
     )
   }
 
-  const tx =
-    await utils.generateDipTx(
-      api,
-      didUri,
-      decodedCall,
-      submitterAddress,
-      verificationMethod,
-      utils.getKeypairTxSigningCallback(requiredKey)
-    )
+  const didKeyId = `#${blake2AsHex(requiredKey.publicKey, 256)}` as '#{string}'
+
+  const tx = await utils.generateDipTx(
+    await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
+    await ApiPromise.create({
+      provider: new WsProvider(providerWsAddress),
+      runtime: dipProviderCalls,
+      types,
+    }),
+    consumerApi,
+    didUri,
+    decodedCall,
+    submitterAddress,
+    didKeyId,
+    verificationMethod,
+    utils.getKeypairTxSigningCallback(requiredKey)
+  )
 
   console.log(
     `
