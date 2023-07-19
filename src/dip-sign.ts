@@ -2,8 +2,8 @@ import 'dotenv/config'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { blake2AsHex, cryptoWaitReady } from '@polkadot/util-crypto'
 import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
-import { blake2AsHex } from '@polkadot/util-crypto'
 
 import * as utils from './utils'
 
@@ -36,6 +36,7 @@ async function main() {
     )
   }
 
+  await cryptoWaitReady()
   // eslint-disable-next-line max-len
   const authKey =
     utils.generateAuthenticationKey() ??
@@ -72,15 +73,21 @@ async function main() {
     )
   }
 
-  const didKeyId = `#${blake2AsHex(requiredKey.publicKey, 256)}` as '#{string}'
+  const providerApi = await ApiPromise.create({
+    provider: new WsProvider(providerWsAddress),
+    runtime: dipProviderCalls,
+    types,
+  })
+  const didEncodedKey = providerApi.createType('DidDidDetailsDidPublicKey', {
+    publicVerificationKey: {
+      [requiredKey.type]: requiredKey.publicKey,
+    },
+  })
+  const didKeyId = `#${blake2AsHex(didEncodedKey.toU8a(), 256)}` as '#{string}'
 
   const tx = await utils.generateDipTx(
     await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
-    await ApiPromise.create({
-      provider: new WsProvider(providerWsAddress),
-      runtime: dipProviderCalls,
-      types,
-    }),
+    providerApi,
     consumerApi,
     didUri,
     decodedCall,

@@ -110,7 +110,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -145,7 +145,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.attKeyType
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -180,7 +180,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.delKeyType
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -217,7 +217,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -309,21 +309,32 @@ export async function generateDipTx(
     `Using previous provider block hash for the state proof generation: ${previousBlockHash.toHex()}.`
   )
   const { proof: paraStateProof } = await providerApi.rpc.state.getReadProof(
-    [providerApi.query.dipConsumer.identityEntries.key(Kilt.Did.toChain(did))],
+    [
+      providerApi.query.dipProvider.identityCommitments.key(
+        Kilt.Did.toChain(did)
+      ),
+    ],
     previousBlockHash
   )
-  const dipProof = (
-    (await providerApi.call.dipProvider.generateProof({
-      identifier: Kilt.Did.toChain(did),
-      keys: [keyId],
-      accounts: [],
-      shouldIncludeWeb3Name: false,
-      // TODO: Improve this line below
-    })) as Result<Codec, Codec>
-  ).asOk as unknown
+  console.log(
+    `DIP proof generated for the DID key ${keyId.substring(
+      1
+    )} (${didKeyRelationship}).`
+  )
+  const dipProof =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (
+      (await providerApi.call.dipProvider.generateProof({
+        identifier: Kilt.Did.toChain(did),
+        keys: [keyId.substring(1)],
+        accounts: [],
+        shouldIncludeWeb3Name: false,
+        // TODO: Improve this line below
+      })) as Result<Codec, Codec>
+    ).asOk as any
   providerApi.disconnect()
 
-  const extrinsic = providerApi.tx.dipConsumer.dispatchAs(
+  const extrinsic = consumerApi.tx.dipConsumer.dispatchAs(
     Kilt.Did.toChain(did),
     {
       paraRootProof: {
