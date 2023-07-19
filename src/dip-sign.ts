@@ -2,8 +2,8 @@ import 'dotenv/config'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
-import { blake2AsHex, cryptoWaitReady } from '@polkadot/util-crypto'
 import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 
 import * as utils from './utils'
 
@@ -78,12 +78,11 @@ async function main() {
     runtime: dipProviderCalls,
     types,
   })
-  const didEncodedKey = providerApi.createType('DidDidDetailsDidPublicKey', {
-    publicVerificationKey: {
-      [requiredKey.type]: requiredKey.publicKey,
-    },
-  })
-  const didKeyId = `#${blake2AsHex(didEncodedKey.toU8a(), 256)}` as '#{string}'
+  const didKeyId = utils.computeDidKeyId(
+    providerApi,
+    requiredKey.publicKey,
+    requiredKey.type
+  )
 
   const tx = await utils.generateDipTx(
     await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),

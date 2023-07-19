@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { BN } from '@polkadot/util'
 import type { Call } from '@polkadot/types/interfaces'
 import type { Codec } from '@polkadot/types/types'
@@ -5,6 +7,7 @@ import type { Result } from '@polkadot/types'
 
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { blake2AsHex } from '@polkadot/util-crypto'
 import { u8aToHex } from '@polkadot/util'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
@@ -110,7 +113,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -145,7 +148,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.attKeyType
+      defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -180,7 +183,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.delKeyType
+      defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -217,7 +220,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -421,6 +424,19 @@ export function hexifyDipSignature(signature: Kilt.Did.EncodedSignature) {
     [signatureType]: u8aToHex(byteSignature),
   }
   return hexifiedSignature
+}
+
+export function computeDidKeyId(
+  api: ApiPromise,
+  publicKey: Kilt.KeyringPair['publicKey'],
+  keyType: Kilt.DidKey['type']
+): Kilt.DidKey['id'] {
+  const didEncodedKey = api.createType('DidDidDetailsDidPublicKey', {
+    publicVerificationKey: {
+      [keyType]: publicKey,
+    },
+  })
+  return `#${blake2AsHex(didEncodedKey.toU8a(), 256)}`
 }
 
 export function generatePolkadotJSLink(
