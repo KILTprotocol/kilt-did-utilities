@@ -84,7 +84,7 @@ async function main() {
     requiredKey.type
   )
 
-  const tx = await utils.generateDipTx(
+  const signedExtrinsic = await utils.generateDipTx(
     await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
     providerApi,
     consumerApi,
@@ -96,11 +96,15 @@ async function main() {
     utils.getKeypairTxSigningCallback(requiredKey)
   )
 
+  const encodedOperation = signedExtrinsic.toHex()
   console.log(
     `
-    DIP tx: ${tx.toHex()}.
+    DIP tx: ${encodedOperation}.
     Please add these details to the "dipConsumer.dispatchAs" function in PolkadotJS.
     `
+  )
+  console.log(
+    `Direct link: ${utils.generatePolkadotJSLink(consumerWsAddress, encodedOperation)}`
   )
 }
 
