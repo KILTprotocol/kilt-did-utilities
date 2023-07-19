@@ -208,3 +208,10 @@ export function generateNewAuthenticationKey():
     return undefined
   }
 }
+
+export function generatePolkadotJSLink(
+  wsAddress: string,
+  encodedExtrinsic: `0x${string}`
+): string {
+  return `https://polkadot.js.org/apps/?rpc=${wsAddress}#/extrinsics/decode/${encodedExtrinsic}`
+}

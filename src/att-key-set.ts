@@ -5,7 +5,8 @@ import * as Kilt from '@kiltprotocol/sdk-js'
 import * as utils from './utils'
 
 async function main() {
-  const api = await Kilt.connect(utils.readWsAddress())
+  const apiAddress = utils.readWsAddress()
+  const api = await Kilt.connect(apiAddress)
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
@@ -63,6 +64,9 @@ async function main() {
   console.log(
     // eslint-disable-next-line max-len
     `New assertion method key operation: ${encodedOperation}. Please submit this via PolkadotJS with the account that was provided: ${submitterAddress}.`
+  )
+  console.log(
+    `Direct link: ${utils.generatePolkadotJSLink(apiAddress, encodedOperation)}`
   )
 }
 
