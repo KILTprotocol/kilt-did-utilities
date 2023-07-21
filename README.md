@@ -68,6 +68,8 @@ Once the right call (i.e., the right pallet and right method) with the right par
 
 The following env variables are required:
 
+- `RELAY_WS_ADDRESS`: The endpoint address of the relaychain.
+- `PROVIDER_WS_ADDRESS`: The endpoint address of the DIP provider chain.
 - `CONSUMER_WS_ADDRESS`: The endpoint address of the consumer chain on which DIP is to be used.
 - `SUBMITTER_ADDRESS`: The address (encoded with the target chain network prefix `38`) that is authorized to submit the transaction on the target chain.
 - `ENCODED_CALL`: The HEX-encoded call to DID-sign.
@@ -76,7 +78,7 @@ The following env variables are required:
 
 The following optional env variables can be passed:
 
-- `IDENTITY_DETAILS`: The runtime type definition of the identity details stored on the consumer chain, according to the DIP protocol. It defaults to `u128`, which represents a simple nonce value.
+- `IDENTITY_DETAILS`: The runtime type definition of the identity details stored on the consumer chain, according to the DIP protocol. It defaults to `Option<u128>`, which represents a simple (optional) nonce value.
 - `ACCOUNT_ID`: The runtime type definition of account address on the consumer chain. It defaults to `AccountId32`, which is the default of most Substrate-based chains. Some chains might use `AccountId20`.
 
 As with DID creation, there is no strong requirement on what other variables must be set.

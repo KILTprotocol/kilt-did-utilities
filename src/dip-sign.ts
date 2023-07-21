@@ -104,7 +104,10 @@ async function main() {
     `
   )
   console.log(
-    `Direct link: ${utils.generatePolkadotJSLink(consumerWsAddress, encodedOperation)}`
+    `Direct link: ${utils.generatePolkadotJSLink(
+      consumerWsAddress,
+      encodedOperation
+    )}`
   )
 }
 
