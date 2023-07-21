@@ -340,17 +340,17 @@ export async function generateDipTx(
   const extrinsic = consumerApi.tx.dipConsumer.dispatchAs(
     Kilt.Did.toChain(did),
     {
-      paraRootProof: {
+      paraStateRoot: {
         relayBlockHeight: relayParentBlockHeight,
         proof: relayProof,
       },
-      dipCommitmentProof: paraStateProof,
-      dipProof: {
-        merkleLeaves: {
+      dipIdentityCommitment: paraStateProof,
+      did: {
+        leaves: {
           blinded: dipProof.proof.blinded,
           revealed: dipProof.proof.revealed,
         },
-        didSignature: {
+        signature: {
           signature: signature[0],
           blockNumber: signature[1],
         },
