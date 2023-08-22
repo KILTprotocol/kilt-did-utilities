@@ -113,7 +113,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -148,7 +148,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.attKeyType
+      defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -183,7 +183,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.delKeyType
+      defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -220,7 +220,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-        defaults.authKeyType
+      defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -253,7 +253,7 @@ export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
   }
 }
 
-export async function generateDipTx(
+export async function generateSiblingDipTx(
   relayApi: ApiPromise,
   providerApi: ApiPromise,
   consumerApi: ApiPromise,
@@ -343,6 +343,120 @@ export async function generateDipTx(
       paraStateRoot: {
         relayBlockHeight: relayParentBlockHeight,
         proof: relayProof,
+      },
+      dipIdentityCommitment: paraStateProof,
+      did: {
+        leaves: {
+          blinded: dipProof.proof.blinded,
+          revealed: dipProof.proof.revealed,
+        },
+        signature: {
+          signature: signature[0],
+          blockNumber: signature[1],
+        },
+      },
+    },
+    call
+  )
+
+  return extrinsic
+}
+
+export async function generateParentDipTx(
+  relayApi: ApiPromise,
+  providerApi: ApiPromise,
+  did: Kilt.DidUri,
+  call: Call,
+  submitterAccount: KeyringPair['address'],
+  keyId: Kilt.DidVerificationKey['id'],
+  didKeyRelationship: Kilt.VerificationKeyRelationship,
+  sign: Kilt.SignExtrinsicCallback
+): Promise<Kilt.SubmittableExtrinsic> {
+  const signature = await generateDipTxSignature(
+    relayApi,
+    did,
+    call,
+    submitterAccount,
+    didKeyRelationship,
+    sign
+  )
+
+  const providerChainId = await providerApi.query.parachainInfo.parachainId()
+  console.log(`Provider chain has para ID = ${providerChainId.toHuman()}.`)
+  const providerFinalizedBlockHash =
+    await providerApi.rpc.chain.getFinalizedHead()
+  const providerFinalizedBlockNumber = await providerApi.rpc.chain
+    .getHeader(providerFinalizedBlockHash)
+    .then((h) => h.number)
+  console.log(
+    `DIP action targeting the last finalized identity provider block with hash:
+    ${providerFinalizedBlockHash}
+    and number
+    ${providerFinalizedBlockNumber}.`
+  )
+  const relayParentBlockHeight = await providerApi
+    .at(providerFinalizedBlockHash)
+    .then((api) => api.query.parachainSystem.lastRelayChainBlockNumber())
+  const relayParentBlockHash = await relayApi.rpc.chain.getBlockHash(
+    relayParentBlockHeight
+  )
+  console.log(
+    `Relay chain block the identity provider block was anchored to:
+    ${relayParentBlockHeight.toHuman()}
+    with hash
+    ${relayParentBlockHash.toHuman()}.`
+  )
+
+  const { proof: relayProof } = await relayApi.rpc.state.getReadProof(
+    [relayApi.query.paras.heads.key(providerChainId)],
+    relayParentBlockHash
+  )
+
+  const header = await relayApi.rpc.chain.getHeader(relayParentBlockHash)
+  console.log(`Header for the relay at block ${relayParentBlockHeight} (${relayParentBlockHash}): ${JSON.stringify(header, null, 2)}`)
+
+  // Proof of commitment must be generated with the state root at the block before the last one finalized.
+  const previousBlockHash = await providerApi.rpc.chain.getBlockHash(
+    providerFinalizedBlockNumber.toNumber() - 1
+  )
+  console.log(
+    `Using previous provider block hash for the state proof generation: ${previousBlockHash.toHex()}.`
+  )
+  const { proof: paraStateProof } = await providerApi.rpc.state.getReadProof(
+    [
+      providerApi.query.dipProvider.identityCommitments.key(
+        Kilt.Did.toChain(did)
+      ),
+    ],
+    previousBlockHash
+  )
+  console.log(
+    `DIP proof generated for the DID key ${keyId.substring(
+      1
+    )} (${didKeyRelationship}).`
+  )
+  const dipProof =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (
+      (await providerApi.call.dipProvider.generateProof({
+        identifier: Kilt.Did.toChain(did),
+        keys: [keyId.substring(1)],
+        accounts: [],
+        shouldIncludeWeb3Name: false,
+        // TODO: Improve this line below
+      })) as Result<Codec, Codec>
+    ).asOk as any
+  providerApi.disconnect()
+
+  const extrinsic = relayApi.tx.dipConsumer.dispatchAs(
+    Kilt.Did.toChain(did),
+    {
+      paraStateRoot: {
+        relayBlockHeight: relayParentBlockHeight,
+        proof: relayProof,
+      },
+      header: {
+        ...header.toJSON()
       },
       dipIdentityCommitment: paraStateProof,
       did: {

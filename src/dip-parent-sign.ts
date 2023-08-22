@@ -10,7 +10,6 @@ import * as utils from './utils'
 async function main() {
   const relayWsAddress = process.env[utils.envNames.relayWsAddress]
   const providerWsAddress = process.env[utils.envNames.providerWsAddress]
-  const consumerWsAddress = process.env[utils.envNames.consumerWsAddress]
   if (relayWsAddress === undefined) {
     throw new Error(
       `No ${utils.envNames.relayWsAddress} env variable specified.`
@@ -21,12 +20,6 @@ async function main() {
       `No ${utils.envNames.providerWsAddress} env variable specified.`
     )
   }
-  if (consumerWsAddress === undefined) {
-    throw new Error(
-      `No ${utils.envNames.consumerWsAddress} env variable specified.`
-    )
-  }
-
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
   ] as Kilt.KiltAddress
@@ -50,7 +43,7 @@ async function main() {
   }
 
   const consumerApi = await ApiPromise.create({
-    provider: new WsProvider(consumerWsAddress),
+    provider: new WsProvider(relayWsAddress),
   })
 
   const encodedCall = process.env[utils.envNames.encodedCall]
@@ -84,10 +77,9 @@ async function main() {
     requiredKey.type
   )
 
-  const signedExtrinsic = await utils.generateDipTx(
-    await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
-    providerApi,
+  const signedExtrinsic = await utils.generateParentDipTx(
     consumerApi,
+    providerApi,
     didUri,
     decodedCall,
     submitterAddress,
@@ -105,7 +97,7 @@ async function main() {
   )
   console.log(
     `Direct link: ${utils.generatePolkadotJSLink(
-      consumerWsAddress,
+      relayWsAddress,
       encodedOperation
     )}`
   )
