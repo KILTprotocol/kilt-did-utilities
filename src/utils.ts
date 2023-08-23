@@ -59,7 +59,7 @@ export const defaults: Defaults = {
   identityDetailsType: 'Option<u128>',
   accountIdType: 'AccountId32',
   blockNumberType: 'u64',
-  includeWeb3Name: false
+  includeWeb3Name: false,
 }
 
 export function getKeypairSigningCallback(
@@ -116,7 +116,7 @@ export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -151,7 +151,7 @@ export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.attKeyType
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       attKeyMnemonic,
@@ -186,7 +186,7 @@ export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.delKeyType
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       delKeyMnemonic,
@@ -223,7 +223,7 @@ export function generateNewAuthenticationKey():
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return new Keyring().addFromMnemonic(
       authKeyMnemonic,
@@ -266,7 +266,7 @@ export async function generateSiblingDipTx(
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
   includeWeb3Name: boolean,
-  sign: Kilt.SignExtrinsicCallback,
+  sign: Kilt.SignExtrinsicCallback
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     consumerApi,
@@ -375,7 +375,7 @@ export async function generateParentDipTx(
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
   includeWeb3Name: boolean,
-  sign: Kilt.SignExtrinsicCallback,
+  sign: Kilt.SignExtrinsicCallback
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     relayApi,
@@ -418,7 +418,13 @@ export async function generateParentDipTx(
   )
 
   const header = await relayApi.rpc.chain.getHeader(relayParentBlockHash)
-  console.log(`Header for the relay at block ${relayParentBlockHeight} (${relayParentBlockHash}): ${JSON.stringify(header, null, 2)}`)
+  console.log(
+    `Header for the relay at block ${relayParentBlockHeight} (${relayParentBlockHash}): ${JSON.stringify(
+      header,
+      null,
+      2
+    )}`
+  )
 
   // Proof of commitment must be generated with the state root at the block before the last one finalized.
   const previousBlockHash = await providerApi.rpc.chain.getBlockHash(
@@ -461,7 +467,7 @@ export async function generateParentDipTx(
         proof: relayProof,
       },
       header: {
-        ...header.toJSON()
+        ...header.toJSON(),
       },
       dipIdentityCommitment: paraStateProof,
       did: {
