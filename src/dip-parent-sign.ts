@@ -77,6 +77,9 @@ async function main() {
     requiredKey.type
   )
 
+  const includeWeb3Name = process.env[
+    utils.envNames.includeWeb3Name
+  ]?.toLowerCase() === 'true' || utils.defaults.includeWeb3Name
   const signedExtrinsic = await utils.generateParentDipTx(
     consumerApi,
     providerApi,
@@ -85,6 +88,7 @@ async function main() {
     submitterAddress,
     didKeyId,
     verificationMethod,
+    includeWeb3Name,
     utils.getKeypairTxSigningCallback(requiredKey)
   )
 

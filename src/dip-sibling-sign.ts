@@ -84,6 +84,9 @@ async function main() {
     requiredKey.type
   )
 
+  const includeWeb3Name = process.env[
+    utils.envNames.includeWeb3Name
+  ]?.toLowerCase() === 'true' || utils.defaults.includeWeb3Name
   const signedExtrinsic = await utils.generateSiblingDipTx(
     await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
     providerApi,
@@ -93,7 +96,8 @@ async function main() {
     submitterAddress,
     didKeyId,
     verificationMethod,
-    utils.getKeypairTxSigningCallback(requiredKey)
+    includeWeb3Name,
+    utils.getKeypairTxSigningCallback(requiredKey),
   )
 
   const encodedOperation = signedExtrinsic.toHex()

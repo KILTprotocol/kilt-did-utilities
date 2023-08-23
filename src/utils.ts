@@ -37,6 +37,7 @@ export const envNames = {
   identityDetailsType: 'IDENTITY_DETAILS',
   accountIdType: 'ACCOUNT_ID',
   blockNumberType: 'BLOCK_NUMBER',
+  includeWeb3Name: 'INCLUDE_WEB3NAME',
 }
 
 type Defaults = {
@@ -47,6 +48,7 @@ type Defaults = {
   identityDetailsType: string
   accountIdType: string
   blockNumberType: string
+  includeWeb3Name: boolean
 }
 
 export const defaults: Defaults = {
@@ -57,6 +59,7 @@ export const defaults: Defaults = {
   identityDetailsType: 'Option<u128>',
   accountIdType: 'AccountId32',
   blockNumberType: 'u64',
+  includeWeb3Name: false
 }
 
 export function getKeypairSigningCallback(
@@ -233,9 +236,9 @@ export function generateNewAuthenticationKey():
 }
 
 const validValues: Set<Kilt.VerificationKeyRelationship> = new Set([
-  'authentication',
-  'assertionMethod',
-  'capabilityDelegation',
+  'authentication' as Kilt.VerificationKeyRelationship,
+  'assertionMethod' as Kilt.VerificationKeyRelationship,
+  'capabilityDelegation' as Kilt.VerificationKeyRelationship,
 ])
 export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
   const verificationMethod = process.env[envNames.verificationMethod]
@@ -262,7 +265,8 @@ export async function generateSiblingDipTx(
   submitterAccount: KeyringPair['address'],
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
-  sign: Kilt.SignExtrinsicCallback
+  includeWeb3Name: boolean,
+  sign: Kilt.SignExtrinsicCallback,
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     consumerApi,
@@ -331,7 +335,7 @@ export async function generateSiblingDipTx(
         identifier: Kilt.Did.toChain(did),
         keys: [keyId.substring(1)],
         accounts: [],
-        shouldIncludeWeb3Name: false,
+        shouldIncludeWeb3Name: includeWeb3Name,
         // TODO: Improve this line below
       })) as Result<Codec, Codec>
     ).asOk as any
@@ -370,7 +374,8 @@ export async function generateParentDipTx(
   submitterAccount: KeyringPair['address'],
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
-  sign: Kilt.SignExtrinsicCallback
+  includeWeb3Name: boolean,
+  sign: Kilt.SignExtrinsicCallback,
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     relayApi,
@@ -442,7 +447,7 @@ export async function generateParentDipTx(
         identifier: Kilt.Did.toChain(did),
         keys: [keyId.substring(1)],
         accounts: [],
-        shouldIncludeWeb3Name: false,
+        shouldIncludeWeb3Name: includeWeb3Name,
         // TODO: Improve this line below
       })) as Result<Codec, Codec>
     ).asOk as any
