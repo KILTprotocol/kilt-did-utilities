@@ -121,142 +121,142 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kiltprotocol/asset-did@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/asset-did@npm:0.33.2-dip-0"
+"@kiltprotocol/asset-did@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/asset-did@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
-  checksum: 55eefe4a314240dbdb7d1997970d09765315fbfe4464c3441646ccd4a2d515ba3b8a60e2763fa3f3ff0e36f34eac9dae74358d9b3b91ac7a3957f252e8089cc9
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
+  checksum: c6d72231a9cbff21c09ff6f454da2abe5fd7651a0b473e94b012b7a7ed8310194d2f6b6b6221729d468a67c4e85738ec5de427f808e0261c8718df1290ce992b
   languageName: node
   linkType: hard
 
-"@kiltprotocol/augment-api@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/augment-api@npm:0.33.2-dip-0"
+"@kiltprotocol/augment-api@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/augment-api@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/type-definitions": 0.33.2-dip-0
-  checksum: abcc91c94b5f8b1c0f2ce1349e54de1b34f67b73a40525ad28644530f2994e6c82cf2ff603a5de073e54d4b3b8ffb9c37ec6e4e625d893ccdbcd7245522af5de
+    "@kiltprotocol/type-definitions": 0.33.2-dip-2
+  checksum: e41c475c8fc4e41526388380285535cbb94d9a82bef8ddf80e6b8674e7d7ad4c2518f084ce72d3247cea81a4ad8f09e903e379721cf08105b3f43b4efb7a0876
   languageName: node
   linkType: hard
 
-"@kiltprotocol/chain-helpers@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/chain-helpers@npm:0.33.2-dip-0"
+"@kiltprotocol/chain-helpers@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/chain-helpers@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/config": 0.33.2-dip-0
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
+    "@kiltprotocol/config": 0.33.2-dip-2
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
     "@polkadot/api": ^10.4.0
     "@polkadot/types": ^10.4.0
-  checksum: 9c3027f3382880a397eaaecf4ea53409a7e47f62848c329906b08f3bd7519b955b3c954e25bc97e343aaedb5049c3060f75687ab13a66696ae2558563331fc09
+  checksum: 74a66c684efa85b5558cfc6b5f68c41453140c2952d6a75079fb7635009af53978da4ca15c72ec76556233548c021c782a5b22a939b2cb26bce9f461172e2edf
   languageName: node
   linkType: hard
 
-"@kiltprotocol/config@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/config@npm:0.33.2-dip-0"
+"@kiltprotocol/config@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/config@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/types": 0.33.2-dip-0
+    "@kiltprotocol/types": 0.33.2-dip-2
     "@polkadot/api": ^10.4.0
     typescript-logging: ^1.0.0
-  checksum: 1ae1dffe84ddf9e40d98dfe44ec1965a51513dee81cfc3f93fc4fe21cdc135f51efca9380449e92378aac0fd647373dc0472e40c7073b375089f95c5577c59c7
+  checksum: dbf52e5cbf2212acd1f89fe5959878c87afc8c6980e2b1bd7596a1fc529c325d469c1c0f43de20336ba0659d6eb33ee1ee25dc4b65a675be7c39e5102905d027
   languageName: node
   linkType: hard
 
-"@kiltprotocol/core@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/core@npm:0.33.2-dip-0"
+"@kiltprotocol/core@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/core@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/asset-did": 0.33.2-dip-0
-    "@kiltprotocol/augment-api": 0.33.2-dip-0
-    "@kiltprotocol/chain-helpers": 0.33.2-dip-0
-    "@kiltprotocol/config": 0.33.2-dip-0
-    "@kiltprotocol/did": 0.33.2-dip-0
-    "@kiltprotocol/type-definitions": 0.33.2-dip-0
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
+    "@kiltprotocol/asset-did": 0.33.2-dip-2
+    "@kiltprotocol/augment-api": 0.33.2-dip-2
+    "@kiltprotocol/chain-helpers": 0.33.2-dip-2
+    "@kiltprotocol/config": 0.33.2-dip-2
+    "@kiltprotocol/did": 0.33.2-dip-2
+    "@kiltprotocol/type-definitions": 0.33.2-dip-2
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
     "@polkadot/api": ^10.4.0
     "@polkadot/keyring": ^12.0.0
     "@polkadot/types": ^10.4.0
     "@polkadot/util": ^12.0.0
     "@polkadot/util-crypto": ^12.0.0
-  checksum: 0d86aa97d7916e662694fdce8c9d78c49163787296f8d630f05c964e330f56e13fe426bcb87c5ee2596790e4dcb4f752c27ea3cf12c36d5c75ce7b130e932a91
+  checksum: 5ea0f98bd4169c05f90123462894bb0fef043ff82ce0aff3e92f36ecd40a46444d82c04bfa361937161d177934717d9d4c1197d087a24ad778ca4b3092f9d010
   languageName: node
   linkType: hard
 
-"@kiltprotocol/did@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/did@npm:0.33.2-dip-0"
+"@kiltprotocol/did@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/did@npm:0.33.2-dip-2"
   dependencies:
     "@digitalbazaar/security-context": ^1.0.0
-    "@kiltprotocol/augment-api": 0.33.2-dip-0
-    "@kiltprotocol/config": 0.33.2-dip-0
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
+    "@kiltprotocol/augment-api": 0.33.2-dip-2
+    "@kiltprotocol/config": 0.33.2-dip-2
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
     "@polkadot/api": ^10.4.0
     "@polkadot/keyring": ^12.0.0
     "@polkadot/types": ^10.4.0
     "@polkadot/types-codec": ^10.4.0
     "@polkadot/util": ^12.0.0
     "@polkadot/util-crypto": ^12.0.0
-  checksum: 808370535daba12a2eff1195965a96f8da0038e562f1ed478294e07589833c1650f27a56b0d9d77f3cfaba9d9e58d76599bc23a5ba833e095d54f64434f70095
+  checksum: f71b06da32a3d79bf1aefe2560e38cb3d0a62d249433832b52b29419d434d6fb917ca59a995dd20c8f992c4b1a7c2b64bdb769647b0bee4272f7f4ab51979d4a
   languageName: node
   linkType: hard
 
-"@kiltprotocol/messaging@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/messaging@npm:0.33.2-dip-0"
+"@kiltprotocol/messaging@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/messaging@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/core": 0.33.2-dip-0
-    "@kiltprotocol/did": 0.33.2-dip-0
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
+    "@kiltprotocol/core": 0.33.2-dip-2
+    "@kiltprotocol/did": 0.33.2-dip-2
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
     "@polkadot/util": ^12.0.0
-  checksum: 2b1a383ea9db220cb017916be949b58912d1dded813491ac4b89fe97f642bcc66f2135c926a39af2024b89886f019e01472c71c9a10368e6906fc05632041e91
+  checksum: 4fd611931001fd326b125d09c68142fc71c1b2c8728b59e71470b9d9101b8b3eb3a29b4cf0427b6dabfc878b3e7d9b984ec9d4e8619a14832196c36832771d3b
   languageName: node
   linkType: hard
 
-"@kiltprotocol/sdk-js@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/sdk-js@npm:0.33.2-dip-0"
+"@kiltprotocol/sdk-js@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/sdk-js@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/chain-helpers": 0.33.2-dip-0
-    "@kiltprotocol/config": 0.33.2-dip-0
-    "@kiltprotocol/core": 0.33.2-dip-0
-    "@kiltprotocol/did": 0.33.2-dip-0
-    "@kiltprotocol/messaging": 0.33.2-dip-0
-    "@kiltprotocol/types": 0.33.2-dip-0
-    "@kiltprotocol/utils": 0.33.2-dip-0
-  checksum: dcdc49cdcbf627f9ef74cbefe15ef183a83f50d42e9c6a9d946abe57a575cfa7352c0caca12e7dee3e192eb24497d46c4aa465820324471006053649ca340ec1
+    "@kiltprotocol/chain-helpers": 0.33.2-dip-2
+    "@kiltprotocol/config": 0.33.2-dip-2
+    "@kiltprotocol/core": 0.33.2-dip-2
+    "@kiltprotocol/did": 0.33.2-dip-2
+    "@kiltprotocol/messaging": 0.33.2-dip-2
+    "@kiltprotocol/types": 0.33.2-dip-2
+    "@kiltprotocol/utils": 0.33.2-dip-2
+  checksum: 552773144d6afab40aaea5d38a5137492a31fa6f4a57790756ea7c14862fb10e89b342ad1531c2778a24fe171bcf2cf8384a2571c84c7bcc83be8138f0c5dfed
   languageName: node
   linkType: hard
 
-"@kiltprotocol/type-definitions@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/type-definitions@npm:0.33.2-dip-0"
-  checksum: 50c492cb65e982bd0e3171cea87fee9b708ba4506084c4ed82278294412ed5b1fa8a13a13c84f350cdb18220139b57c15bf371da9a22715a124d16e8cbf4c003
+"@kiltprotocol/type-definitions@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/type-definitions@npm:0.33.2-dip-2"
+  checksum: 003d0aaa5e08154b3b0568d4f1004a873cd97474b7ba503a6ac081b4c10662449a3d03f845eaad1a6793d90d310d9193292d368692d2258621ac9aac77428edd
   languageName: node
   linkType: hard
 
-"@kiltprotocol/types@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/types@npm:0.33.2-dip-0"
+"@kiltprotocol/types@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/types@npm:0.33.2-dip-2"
   dependencies:
     "@polkadot/api": ^10.4.0
     "@polkadot/keyring": ^12.0.0
     "@polkadot/types": ^10.4.0
     "@polkadot/util": ^12.0.0
     "@polkadot/util-crypto": ^12.0.0
-  checksum: bb5083d1a6abd2ba92d41ae6e5d6a4b452a81d77d2440cbeeb0ad731312876ec6b688fed48ec40e0aded0d91cc2732d8aadbd5188e1114cb85e1bcfbce535218
+  checksum: da20c155a9aea7d132527d3f3d7e63eed3f2bf8ebe9a2cc157d7975eb04c6e83c8f30077209b399769e36af524702ef6d0dfe679a7f61b45193eb8f1a0e35f97
   languageName: node
   linkType: hard
 
-"@kiltprotocol/utils@npm:0.33.2-dip-0":
-  version: 0.33.2-dip-0
-  resolution: "@kiltprotocol/utils@npm:0.33.2-dip-0"
+"@kiltprotocol/utils@npm:0.33.2-dip-2":
+  version: 0.33.2-dip-2
+  resolution: "@kiltprotocol/utils@npm:0.33.2-dip-2"
   dependencies:
-    "@kiltprotocol/types": 0.33.2-dip-0
+    "@kiltprotocol/types": 0.33.2-dip-2
     "@polkadot/api": ^10.4.0
     "@polkadot/keyring": ^12.0.0
     "@polkadot/util": ^12.0.0
@@ -264,7 +264,7 @@ __metadata:
     cbor-web: ^9.0.0
     tweetnacl: ^1.0.3
     uuid: ^9.0.0
-  checksum: d140dc75a00ad8a661c469c6f64d283b88ad674cc20e89b313c6daa2064f7694b0354b9ba6465ea2453a74ba2684a6e477e15962a96289a45efe0ad3045aab27
+  checksum: 9f3b7ee805dbbcf8d4c447266d99d8f98605b2662427186a729386bdf5a9839b0c2fc8a606411c47cb5dc46a0621d415d98d4f3151125cfa95c06ed3d3903004
   languageName: node
   linkType: hard
 
@@ -1708,7 +1708,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kilt-did-utilities@workspace:."
   dependencies:
-    "@kiltprotocol/sdk-js": 0.33.2-dip-0
+    "@kiltprotocol/sdk-js": 0.33.2-dip-2
     "@typescript-eslint/eslint-plugin": ^5.37.0
     "@typescript-eslint/parser": ^5.37.0
     dotenv: ^16.0.1
