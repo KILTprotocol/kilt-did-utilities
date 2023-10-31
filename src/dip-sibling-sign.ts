@@ -73,6 +73,15 @@ async function main() {
     )
   }
 
+  // eslint-disable-next-line max-len
+  const dipProofVersion = (() => {
+    if (process.env[utils.envNames.dipProofVersion] !== undefined) {
+      return parseInt(process.env[utils.envNames.dipProofVersion] as string)
+    } else {
+      return utils.defaults.dipProofVersion
+    }
+  })()
+
   const providerApi = await ApiPromise.create({
     provider: new WsProvider(providerWsAddress),
     runtime: dipProviderCalls,
@@ -97,6 +106,7 @@ async function main() {
     didKeyId,
     verificationMethod,
     includeWeb3Name,
+    dipProofVersion,
     utils.getKeypairTxSigningCallback(requiredKey)
   )
 

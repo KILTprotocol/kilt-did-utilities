@@ -38,6 +38,7 @@ export const envNames = {
   accountIdType: 'ACCOUNT_ID',
   blockNumberType: 'BLOCK_NUMBER',
   includeWeb3Name: 'INCLUDE_WEB3NAME',
+  dipProofVersion: 'DIP_PROOF_VERSION',
 }
 
 type Defaults = {
@@ -49,6 +50,7 @@ type Defaults = {
   accountIdType: string
   blockNumberType: string
   includeWeb3Name: boolean
+  dipProofVersion: number
 }
 
 export const defaults: Defaults = {
@@ -60,6 +62,7 @@ export const defaults: Defaults = {
   accountIdType: 'AccountId32',
   blockNumberType: 'u64',
   includeWeb3Name: false,
+  dipProofVersion: 0,
 }
 
 export function getKeypairSigningCallback(
@@ -266,6 +269,7 @@ export async function generateSiblingDipTx(
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
   includeWeb3Name: boolean,
+  version: number,
   sign: Kilt.SignExtrinsicCallback
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
@@ -318,13 +322,14 @@ export async function generateSiblingDipTx(
   const { proof: paraStateProof } = await providerApi.rpc.state.getReadProof(
     [
       providerApi.query.dipProvider.identityCommitments.key(
-        Kilt.Did.toChain(did)
+        Kilt.Did.toChain(did),
+        version
       ),
     ],
     previousBlockHash
   )
   console.log(
-    `DIP proof generated for the DID key ${keyId.substring(
+    `DIP proof v${version} generated for the DID key ${keyId.substring(
       1
     )} (${didKeyRelationship}).`
   )
@@ -333,6 +338,7 @@ export async function generateSiblingDipTx(
     (
       (await providerApi.call.dipProvider.generateProof({
         identifier: Kilt.Did.toChain(did),
+        version,
         keys: [keyId.substring(1)],
         accounts: [],
         shouldIncludeWeb3Name: includeWeb3Name,
@@ -344,19 +350,21 @@ export async function generateSiblingDipTx(
   const extrinsic = consumerApi.tx.dipConsumer.dispatchAs(
     Kilt.Did.toChain(did),
     {
-      paraStateRoot: {
-        relayBlockHeight: relayParentBlockHeight,
-        proof: relayProof,
-      },
-      dipIdentityCommitment: paraStateProof,
-      did: {
-        leaves: {
-          blinded: dipProof.proof.blinded,
-          revealed: dipProof.proof.revealed,
+      [`V${version}`]: {
+        paraStateRoot: {
+          relayBlockHeight: relayParentBlockHeight,
+          proof: relayProof,
         },
-        signature: {
-          signature: signature[0],
-          blockNumber: signature[1],
+        dipIdentityCommitment: paraStateProof,
+        did: {
+          leaves: {
+            blinded: dipProof.proof.blinded,
+            revealed: dipProof.proof.revealed,
+          },
+          signature: {
+            signature: signature[0],
+            blockNumber: signature[1],
+          },
         },
       },
     },
@@ -375,6 +383,7 @@ export async function generateParentDipTx(
   keyId: Kilt.DidVerificationKey['id'],
   didKeyRelationship: Kilt.VerificationKeyRelationship,
   includeWeb3Name: boolean,
+  version: number,
   sign: Kilt.SignExtrinsicCallback
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
@@ -436,13 +445,14 @@ export async function generateParentDipTx(
   const { proof: paraStateProof } = await providerApi.rpc.state.getReadProof(
     [
       providerApi.query.dipProvider.identityCommitments.key(
-        Kilt.Did.toChain(did)
+        Kilt.Did.toChain(did),
+        version
       ),
     ],
     previousBlockHash
   )
   console.log(
-    `DIP proof generated for the DID key ${keyId.substring(
+    `DIP proof v${version} generated for the DID key ${keyId.substring(
       1
     )} (${didKeyRelationship}).`
   )
@@ -451,6 +461,7 @@ export async function generateParentDipTx(
     (
       (await providerApi.call.dipProvider.generateProof({
         identifier: Kilt.Did.toChain(did),
+        version,
         keys: [keyId.substring(1)],
         accounts: [],
         shouldIncludeWeb3Name: includeWeb3Name,
@@ -462,22 +473,24 @@ export async function generateParentDipTx(
   const extrinsic = relayApi.tx.dipConsumer.dispatchAs(
     Kilt.Did.toChain(did),
     {
-      paraStateRoot: {
-        relayBlockHeight: relayParentBlockHeight,
-        proof: relayProof,
-      },
-      header: {
-        ...header.toJSON(),
-      },
-      dipIdentityCommitment: paraStateProof,
-      did: {
-        leaves: {
-          blinded: dipProof.proof.blinded,
-          revealed: dipProof.proof.revealed,
+      [`V${version}`]: {
+        paraStateRoot: {
+          relayBlockHeight: relayParentBlockHeight,
+          proof: relayProof,
         },
-        signature: {
-          signature: signature[0],
-          blockNumber: signature[1],
+        header: {
+          ...header.toJSON(),
+        },
+        dipIdentityCommitment: paraStateProof,
+        did: {
+          leaves: {
+            blinded: dipProof.proof.blinded,
+            revealed: dipProof.proof.revealed,
+          },
+          signature: {
+            signature: signature[0],
+            blockNumber: signature[1],
+          },
         },
       },
     },
