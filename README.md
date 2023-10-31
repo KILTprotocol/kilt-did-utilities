@@ -81,6 +81,7 @@ The following optional env variables can be passed:
 - `IDENTITY_DETAILS`: The runtime type definition of the identity details stored on the consumer chain, according to the DIP protocol. It defaults to `Option<u128>`, which represents a simple (optional) nonce value.
 - `ACCOUNT_ID`: The runtime type definition of account address on the consumer chain. It defaults to `AccountId32`, which is the default of most Substrate-based chains. Some chains might use `AccountId20`.
 - `INCLUDE_WEB3NAME`: Wether the web3name of the DID should be added to the DIP proof of not. Values can be anything that is truthy in JS terms. It defaults to `false`. **The proof generation will fail if this value is `true` but the DID does not have a web3name.**
+- `DIP_PROOF_VERSION`: The version of the DIP proof to generate and use as part of the extrinsic. It defaults to `0`.
 
 As with DID creation, there is no strong requirement on what other variables must be set.
 Depending on the expected key to be used to sign the call, the right mnemonic or the right base mnemonic + derivation path must be provided.
@@ -111,6 +112,7 @@ The following optional env variables can be passed:
 - `IDENTITY_DETAILS`: The runtime type definition of the identity details stored on the consumer chain, according to the DIP protocol. It defaults to `Option<u128>`, which represents a simple (optional) nonce value.
 - `ACCOUNT_ID`: The runtime type definition of account address on the consumer chain. It defaults to `AccountId32`, which is the default of most Substrate-based chains. Some chains might use `AccountId20`.
 - `INCLUDE_WEB3NAME`: Wether the web3name of the DID should be added to the DIP proof of not. Values can be anything that is truthy in JS terms. It defaults to `false`. **The proof generation will fail if this value is `true` but the DID does not have a web3name.**
+- `DIP_PROOF_VERSION`: The version of the DIP proof to generate and use as part of the extrinsic. It defaults to `0`.
 
 As with DID creation, there is no strong requirement on what other variables must be set.
 Depending on the expected key to be used to sign the call, the right mnemonic or the right base mnemonic + derivation path must be provided.
