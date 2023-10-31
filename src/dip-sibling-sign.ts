@@ -2,19 +2,30 @@ import 'dotenv/config'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 import { ApiPromise, WsProvider } from '@polkadot/api'
+import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 
 import * as utils from './utils'
 
 async function main() {
+  const relayWsAddress = process.env[utils.envNames.relayWsAddress]
+  const providerWsAddress = process.env[utils.envNames.providerWsAddress]
   const consumerWsAddress = process.env[utils.envNames.consumerWsAddress]
+  if (relayWsAddress === undefined) {
+    throw new Error(
+      `No ${utils.envNames.relayWsAddress} env variable specified.`
+    )
+  }
+  if (providerWsAddress === undefined) {
+    throw new Error(
+      `No ${utils.envNames.providerWsAddress} env variable specified.`
+    )
+  }
   if (consumerWsAddress === undefined) {
     throw new Error(
       `No ${utils.envNames.consumerWsAddress} env variable specified.`
     )
   }
-  const api = await ApiPromise.create({
-    provider: new WsProvider(consumerWsAddress),
-  })
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
@@ -25,6 +36,7 @@ async function main() {
     )
   }
 
+  await cryptoWaitReady()
   // eslint-disable-next-line max-len
   const authKey =
     utils.generateAuthenticationKey() ??
@@ -37,8 +49,12 @@ async function main() {
     throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }
 
+  const consumerApi = await ApiPromise.create({
+    provider: new WsProvider(consumerWsAddress),
+  })
+
   const encodedCall = process.env[utils.envNames.encodedCall]
-  const decodedCall = api.createType('Call', encodedCall)
+  const decodedCall = consumerApi.createType('Call', encodedCall)
 
   const [requiredKey, verificationMethod] = (() => {
     const providedMethod = utils.parseVerificationMethod()
@@ -56,25 +72,46 @@ async function main() {
       'The DID key to authorize the operation is not part of the DID Document. Please add such a key before re-trying.'
     )
   }
-  const [dipSignature, blockNumber] = await utils.generateDipTxSignature(
-    api,
+
+  const providerApi = await ApiPromise.create({
+    provider: new WsProvider(providerWsAddress),
+    runtime: dipProviderCalls,
+    types,
+  })
+  const didKeyId = utils.computeDidKeyId(
+    providerApi,
+    requiredKey.publicKey,
+    requiredKey.type
+  )
+
+  const includeWeb3Name =
+    process.env[utils.envNames.includeWeb3Name]?.toLowerCase() === 'true' ||
+    utils.defaults.includeWeb3Name
+  const signedExtrinsic = await utils.generateSiblingDipTx(
+    await ApiPromise.create({ provider: new WsProvider(relayWsAddress) }),
+    providerApi,
+    consumerApi,
     didUri,
     decodedCall,
     submitterAddress,
+    didKeyId,
     verificationMethod,
+    includeWeb3Name,
     utils.getKeypairTxSigningCallback(requiredKey)
   )
 
+  const encodedOperation = signedExtrinsic.toHex()
   console.log(
     `
-    DID signature for submission via DIP: ${JSON.stringify(
-      utils.hexifyDipSignature(dipSignature),
-      null,
-      2
-    )}.
-    Block number used for signature generation: ${blockNumber.toString()}.
+    DIP tx: ${encodedOperation}.
     Please add these details to the "dipConsumer.dispatchAs" function in PolkadotJS.
     `
+  )
+  console.log(
+    `Direct link: ${utils.generatePolkadotJSLink(
+      consumerWsAddress,
+      encodedOperation
+    )}`
   )
 }
 
