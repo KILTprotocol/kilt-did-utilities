@@ -6,6 +6,8 @@
     "att-key-set": "ts-node src/att-key-set.ts",
     "del-key-set": "ts-node src/del-key-set.ts",
     "did-create": "ts-node src/did-create.ts",
+    "dip-sign:parent": "ts-node src/dip-parent-sign.ts",
+    "dip-sign:sibling": "ts-node src/dip-sibling-sign.ts",
     "call-authorize": "ts-node src/call-sign",
     "check-ts": "tsc src/** --skipLibCheck --noEmit",
     "lint": "eslint . --ext .ts --format=codeframe",
@@ -15,7 +17,7 @@
     "fix": "yarn lint:fix && yarn style:fix"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "^0.32.0",
+    "@kiltprotocol/sdk-js": "0.33.2-dip-2",
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
@@ -27,5 +29,6 @@
     "prettier": "^2.7.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
-  }
+  },
+  "packageManager": "yarn@3.6.0"
 }
