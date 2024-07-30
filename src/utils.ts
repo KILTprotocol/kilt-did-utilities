@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type {
+  DidUrl,
+  MultibaseKeyPair,
+  SignatureVerificationRelationship,
+  VerificationMethod,
+  VerificationRelationship,
+} from '@kiltprotocol/types'
 import type { BN } from '@polkadot/util'
 import type { Call } from '@polkadot/types/interfaces'
 import type { Codec } from '@polkadot/types/types'
 import type { Result } from '@polkadot/types'
 
-import { ApiPromise, Keyring } from '@polkadot/api'
+import { ApiPromise } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { u8aToHex } from '@polkadot/util'
@@ -43,9 +50,9 @@ export const envNames = {
 
 type Defaults = {
   wsAddress: string
-  authKeyType: Kilt.KeyringPair['type']
-  attKeyType: Kilt.KeyringPair['type']
-  delKeyType: Kilt.KeyringPair['type']
+  authKeyType: KeyringPair['type']
+  attKeyType: KeyringPair['type']
+  delKeyType: KeyringPair['type']
   identityDetailsType: string
   accountIdType: string
   blockNumberType: string
@@ -63,17 +70,6 @@ export const defaults: Defaults = {
   blockNumberType: 'u64',
   includeWeb3Name: false,
   dipProofVersion: 0,
-}
-
-export function getKeypairSigningCallback(
-  keyUri: Kilt.DidResourceUri,
-  signingKeypair: Kilt.KiltKeyringPair
-): Kilt.SignCallback {
-  return async ({ data }) => ({
-    signature: signingKeypair.sign(data),
-    keyType: signingKeypair.type,
-    keyUri,
-  })
 }
 
 export function getKeypairTxSigningCallback(
@@ -113,19 +109,15 @@ function readAuthenticationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
-export function generateAuthenticationKey(): Kilt.KiltKeyringPair | undefined {
+export function generateAuthenticationKey(): MultibaseKeyPair | undefined {
   const authKeyMnemonic = readAuthenticationKeyMnemonic()
   const authKeyType =
     authKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.authKeyType] as Kilt.KeyringPair['type']) ||
+      : (process.env[envNames.authKeyType] as KeyringPair['type']) ||
         defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
-    return new Keyring().addFromMnemonic(
-      authKeyMnemonic,
-      {},
-      authKeyType
-    ) as Kilt.KiltKeyringPair
+    return Kilt.generateKeypair({ seed: authKeyMnemonic, type: authKeyType })
   } else {
     return undefined
   }
@@ -148,19 +140,15 @@ function readAttestationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
-export function generateAttestationKey(): Kilt.KiltKeyringPair | undefined {
+export function generateAttestationKey(): MultibaseKeyPair | undefined {
   const attKeyMnemonic = readAttestationKeyMnemonic()
   const attKeyType =
     attKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.attKeyType] as Kilt.KeyringPair['type']) ||
+      : (process.env[envNames.attKeyType] as KeyringPair['type']) ||
         defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
-    return new Keyring().addFromMnemonic(
-      attKeyMnemonic,
-      {},
-      attKeyType
-    ) as Kilt.KiltKeyringPair
+    return Kilt.generateKeypair({ seed: attKeyMnemonic, type: attKeyType })
   } else {
     return undefined
   }
@@ -183,19 +171,15 @@ function readDelegationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
-export function generateDelegationKey(): Kilt.KiltKeyringPair | undefined {
+export function generateDelegationKey(): MultibaseKeyPair | undefined {
   const delKeyMnemonic = readDelegationKeyMnemonic()
   const delKeyType =
     delKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.delKeyType] as Kilt.KeyringPair['type']) ||
+      : (process.env[envNames.delKeyType] as KeyringPair['type']) ||
         defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
-    return new Keyring().addFromMnemonic(
-      delKeyMnemonic,
-      {},
-      delKeyType
-    ) as Kilt.KiltKeyringPair
+    return Kilt.generateKeypair({ seed: delKeyMnemonic, type: delKeyType })
   } else {
     return undefined
   }
@@ -218,38 +202,32 @@ function readNewAuthenticationKeyMnemonic(): string | undefined {
     return undefined
   }
 }
-export function generateNewAuthenticationKey():
-  | Kilt.KiltKeyringPair
-  | undefined {
+export function generateNewAuthenticationKey(): MultibaseKeyPair | undefined {
   const authKeyMnemonic = readNewAuthenticationKeyMnemonic()
   const authKeyType =
     authKeyMnemonic === undefined
       ? undefined
-      : (process.env[envNames.newAuthKeyType] as Kilt.KeyringPair['type']) ||
+      : (process.env[envNames.newAuthKeyType] as KeyringPair['type']) ||
         defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
-    return new Keyring().addFromMnemonic(
-      authKeyMnemonic,
-      {},
-      authKeyType
-    ) as Kilt.KiltKeyringPair
+    return Kilt.generateKeypair({ seed: authKeyMnemonic, type: authKeyType })
   } else {
     return undefined
   }
 }
 
-const validValues: Set<Kilt.VerificationKeyRelationship> = new Set([
-  'authentication' as Kilt.VerificationKeyRelationship,
-  'assertionMethod' as Kilt.VerificationKeyRelationship,
-  'capabilityDelegation' as Kilt.VerificationKeyRelationship,
+const validValues: Set<SignatureVerificationRelationship> = new Set([
+  'authentication',
+  'assertionMethod',
+  'capabilityDelegation',
 ])
-export function parseVerificationMethod(): Kilt.VerificationKeyRelationship {
+export function parseVerificationMethod(): SignatureVerificationRelationship {
   const verificationMethod = process.env[envNames.verificationMethod]
   if (verificationMethod === undefined) {
     throw new Error(`No ${envNames.verificationMethod} env variable specified.`)
   }
   const castedVerificationMethod =
-    verificationMethod as Kilt.VerificationKeyRelationship
+    verificationMethod as SignatureVerificationRelationship
   if (validValues.has(castedVerificationMethod)) {
     return castedVerificationMethod
   } else {
@@ -263,14 +241,14 @@ export async function generateSiblingDipTx(
   relayApi: ApiPromise,
   providerApi: ApiPromise,
   consumerApi: ApiPromise,
-  did: Kilt.DidUri,
+  did: DidUrl,
   call: Call,
   submitterAccount: KeyringPair['address'],
-  keyId: Kilt.DidVerificationKey['id'],
-  didKeyRelationship: Kilt.VerificationKeyRelationship,
+  keyId: VerificationMethod['id'],
+  didKeyRelationship: VerificationRelationship,
   includeWeb3Name: boolean,
   version: number,
-  sign: Kilt.SignExtrinsicCallback
+  sign: SignExtrinsicCallback
 ): Promise<Kilt.SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     consumerApi,

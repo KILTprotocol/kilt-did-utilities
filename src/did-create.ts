@@ -2,7 +2,10 @@ import 'dotenv/config'
 
 import { mnemonicGenerate } from '@polkadot/util-crypto'
 
+import * as Did from '@kiltprotocol/did'
 import * as Kilt from '@kiltprotocol/sdk-js'
+
+import type { KiltAddress } from '@kiltprotocol/types'
 
 import * as utils from './utils'
 
@@ -12,7 +15,7 @@ async function main() {
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
-  ] as Kilt.KiltAddress
+  ] as KiltAddress
   if (submitterAddress === undefined) {
     throw new Error(
       `No "${utils.envNames.submitterAddress}" env variable specified.`
@@ -38,14 +41,40 @@ async function main() {
       `DID authentication key mnemonic could not be found. Please specify one of the following variables: "${utils.envNames.authMnemonic}", "${utils.envNames.authDerivationPath}" depending on the use case.`
     )
   }
+  const authDidKey = Did.multibaseKeyToDidKey(authKey?.publicKeyMultibase)
   const assertionKey = utils.generateAttestationKey()
+  const assertionDidKey = assertionKey
+    ? Did.multibaseKeyToDidKey(assertionKey.publicKeyMultibase)
+    : undefined
   const delegationKey = utils.generateDelegationKey()
+  const delegationDidKey = delegationKey
+    ? Did.multibaseKeyToDidKey(delegationKey.publicKeyMultibase)
+    : undefined
 
-  const fullDidCreationTx = await Kilt.Did.getStoreTx(
+  const fullDidCreationTx = await Did.getStoreTx(
     {
-      authentication: [authKey],
-      assertionMethod: assertionKey ? [assertionKey] : undefined,
-      capabilityDelegation: delegationKey ? [delegationKey] : undefined,
+      authentication: [
+        {
+          publicKey: authDidKey.publicKey,
+          type: authDidKey.keyType as Did.DidSigningMethodType,
+        },
+      ],
+      assertionMethod: assertionDidKey
+        ? [
+          {
+            publicKey: assertionDidKey.publicKey,
+            type: assertionDidKey.keyType as Did.DidSigningMethodType,
+          },
+        ]
+        : undefined,
+      capabilityDelegation: delegationDidKey
+        ? [
+          {
+            publicKey: delegationDidKey.publicKey,
+            type: delegationDidKey.keyType as Did.DidSigningMethodType,
+          },
+        ]
+        : undefined,
     },
     submitterAddress,
     utils.getKeypairTxSigningCallback(authKey)
@@ -53,16 +82,19 @@ async function main() {
 
   const encodedOperation = fullDidCreationTx.toHex()
   console.log(
-    `Operation will create the following DID: ${Kilt.Did.getFullDidUriFromKey(
-      authKey
-    )}`
+    `Operation will create the following DID: ${Did.getFullDidFromVerificationMethod(
+      { publicKeyMultibase: authKey.publicKeyMultibase }
+    )} `
   )
   console.log(
     // eslint-disable-next-line max-len
     `Encoded DID creation operation: ${encodedOperation}. Please submit this via PolkadotJS with the account that was provided: ${submitterAddress}.`
   )
   console.log(
-    `Direct link: ${utils.generatePolkadotJSLink(apiAddress, encodedOperation)}`
+    `Direct link: ${utils.generatePolkadotJSLink(
+      apiAddress,
+      encodedOperation
+    )} `
   )
 }
 
