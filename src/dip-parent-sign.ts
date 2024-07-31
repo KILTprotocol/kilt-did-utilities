@@ -5,6 +5,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 
+import type { Did, KiltAddress } from '@kiltprotocol/types'
+
 import * as utils from './utils'
 
 async function main() {
@@ -22,7 +24,7 @@ async function main() {
   }
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
-  ] as Kilt.KiltAddress
+  ] as KiltAddress
   if (submitterAddress === undefined) {
     throw new Error(
       `No "${utils.envNames.submitterAddress}" env variable specified.`
@@ -33,11 +35,11 @@ async function main() {
   // eslint-disable-next-line max-len
   const authKey =
     utils.generateAuthenticationKey() ??
-    Kilt.Utils.Crypto.makeKeypairFromUri('//Alice')
+    Kilt.generateKeypair({ seed: '//Alice' })
   const assertionKey = utils.generateAttestationKey()
   const delegationKey = utils.generateDelegationKey()
 
-  const didUri = process.env[utils.envNames.didUri] as Kilt.DidUri
+  const didUri = process.env[utils.envNames.didUri] as Did
   if (didUri === undefined) {
     throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }

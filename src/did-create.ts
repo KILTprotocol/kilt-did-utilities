@@ -61,19 +61,19 @@ async function main() {
       ],
       assertionMethod: assertionDidKey
         ? [
-          {
-            publicKey: assertionDidKey.publicKey,
-            type: assertionDidKey.keyType as Did.DidSigningMethodType,
-          },
-        ]
+            {
+              publicKey: assertionDidKey.publicKey,
+              type: assertionDidKey.keyType as Did.DidSigningMethodType,
+            },
+          ]
         : undefined,
       capabilityDelegation: delegationDidKey
         ? [
-          {
-            publicKey: delegationDidKey.publicKey,
-            type: delegationDidKey.keyType as Did.DidSigningMethodType,
-          },
-        ]
+            {
+              publicKey: delegationDidKey.publicKey,
+              type: delegationDidKey.keyType as Did.DidSigningMethodType,
+            },
+          ]
         : undefined,
     },
     submitterAddress,

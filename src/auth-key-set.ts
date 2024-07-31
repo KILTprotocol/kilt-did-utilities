@@ -2,6 +2,8 @@ import 'dotenv/config'
 
 import * as Kilt from '@kiltprotocol/sdk-js'
 
+import type { Did, KiltAddress } from '@kiltprotocol/types'
+
 import * as utils from './utils'
 
 async function main() {
@@ -10,7 +12,7 @@ async function main() {
 
   const submitterAddress = process.env[
     utils.envNames.submitterAddress
-  ] as Kilt.KiltAddress
+  ] as KiltAddress
   if (submitterAddress === undefined) {
     throw new Error(
       `No "${utils.envNames.submitterAddress}" env variable specified.`
@@ -25,7 +27,7 @@ async function main() {
     )
   }
 
-  const didUri = process.env[utils.envNames.didUri] as Kilt.DidUri
+  const didUri = process.env[utils.envNames.didUri] as Did
   if (didUri === undefined) {
     throw new Error(`"${utils.envNames.didUri}" not specified.`)
   }
@@ -38,29 +40,22 @@ async function main() {
     )
   }
 
-  const fullDid: Kilt.DidDocument = {
-    uri: didUri,
-    authentication: [
-      {
-        ...authKey,
-        // Not needed
-        id: '#key',
-      },
-    ],
+  const { didDocument } = await Kilt.DidResolver.resolve(didUri)
+
+  if (didDocument === undefined) {
+    throw new Error(`The specified DID ${didUri} is not a full DID.`)
   }
 
-  const newAuthKeyTx = api.tx.did.setAuthenticationKey(
-    Kilt.Did.publicKeyToChain(newAuthKey)
-  )
+  const newAuthKeyTx = await Kilt.DidHelpers.setVerificationMethod({
+    api,
+    didDocument,
+    publicKey: newAuthKey,
+    relationship: 'authentication',
+    signers: await Kilt.getSignersForKeypair({ keypair: authKey }),
+    submitter: submitterAddress,
+  }).getSubmittable()
 
-  const signedExtrinsic = await Kilt.Did.authorizeTx(
-    fullDid.uri,
-    newAuthKeyTx,
-    utils.getKeypairTxSigningCallback(authKey),
-    submitterAddress
-  )
-
-  const encodedOperation = signedExtrinsic.toHex()
+  const encodedOperation = newAuthKeyTx.txHex
   console.log(
     // eslint-disable-next-line max-len
     `New authentication key operation: ${encodedOperation}. Please submit this via PolkadotJS with the account that was provided: ${submitterAddress}.`
