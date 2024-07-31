@@ -77,7 +77,7 @@ async function main() {
         : undefined,
     },
     submitterAddress,
-    utils.getKeypairTxSigningCallback(authKey)
+    await Kilt.getSignersForKeypair({ keypair: authKey })
   )
 
   const encodedOperation = fullDidCreationTx.toHex()

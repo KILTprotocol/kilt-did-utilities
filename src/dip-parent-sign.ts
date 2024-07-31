@@ -5,7 +5,12 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { dipProviderCalls, types } from '@kiltprotocol/type-definitions'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 
-import type { Did, KiltAddress } from '@kiltprotocol/types'
+import type {
+  Did,
+  KiltAddress,
+  MultibaseKeyPair,
+  SignerInterface,
+} from '@kiltprotocol/types'
 
 import * as utils from './utils'
 
@@ -51,22 +56,33 @@ async function main() {
   const encodedCall = process.env[utils.envNames.encodedCall]
   const decodedCall = consumerApi.createType('Call', encodedCall)
 
-  const [requiredKey, verificationMethod] = (() => {
+  const singingDetails = await (async () => {
     const providedMethod = utils.parseVerificationMethod()
     switch (providedMethod) {
       case 'authentication':
-        return [authKey, providedMethod]
+        return [authKey, await Kilt.getSignersForKeypair({ keypair: authKey })]
       case 'assertionMethod':
-        return [assertionKey, providedMethod]
+        return assertionKey
+          ? [
+              assertionKey,
+              await Kilt.getSignersForKeypair({ keypair: assertionKey }),
+            ]
+          : undefined
       case 'capabilityDelegation':
-        return [delegationKey, providedMethod]
+        return delegationKey
+          ? [
+              delegationKey,
+              await Kilt.getSignersForKeypair({ keypair: delegationKey }),
+            ]
+          : undefined
     }
   })()
-  if (requiredKey === undefined) {
+  if (singingDetails === undefined) {
     throw new Error(
       'The DID key to authorize the operation is not part of the DID Document. Please add such a key before re-trying.'
     )
   }
+  const [key, signers] = singingDetails as [MultibaseKeyPair, SignerInterface]
 
   // eslint-disable-next-line max-len
   const dipProofVersion = (() => {
@@ -82,11 +98,7 @@ async function main() {
     runtime: dipProviderCalls,
     types,
   })
-  const didKeyId = utils.computeDidKeyId(
-    providerApi,
-    requiredKey.publicKey,
-    requiredKey.type
-  )
+  const didKeyId = utils.computeDidKeyId(providerApi, key.publicKeyMultibase)
 
   const includeWeb3Name =
     process.env[utils.envNames.includeWeb3Name]?.toLowerCase() === 'true' ||
@@ -98,10 +110,9 @@ async function main() {
     decodedCall,
     submitterAddress,
     didKeyId,
-    verificationMethod,
     includeWeb3Name,
     dipProofVersion,
-    utils.getKeypairTxSigningCallback(requiredKey)
+    signers
   )
 
   const encodedOperation = signedExtrinsic.toHex()

@@ -3,13 +3,10 @@
 import type {
   Base58BtcMultibaseString,
   Did as DidIdentifier,
-  DidUrl,
   MultibaseKeyPair,
   SignatureVerificationRelationship,
   SignerInterface,
   SubmittableExtrinsic,
-  VerificationMethod,
-  VerificationRelationship,
 } from '@kiltprotocol/types'
 import type { BN } from '@polkadot/util'
 import type { Call } from '@polkadot/types/interfaces'
@@ -77,15 +74,6 @@ export const defaults: Defaults = {
   dipProofVersion: 0,
 }
 
-export function getKeypairTxSigningCallback(
-  signingKeypair: Kilt.KiltKeyringPair
-): Kilt.Did.GetStoreTxSignCallback {
-  return async ({ data }) => ({
-    signature: signingKeypair.sign(data),
-    keyType: signingKeypair.type,
-  })
-}
-
 export function readWsAddress(): string {
   let wsAddress = process.env[envNames.wsAddress]
   if (wsAddress === undefined) {
@@ -120,7 +108,7 @@ export function generateAuthenticationKey(): MultibaseKeyPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.authKeyType] as KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return Kilt.generateKeypair({ seed: authKeyMnemonic, type: authKeyType })
   } else {
@@ -151,7 +139,7 @@ export function generateAttestationKey(): MultibaseKeyPair | undefined {
     attKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.attKeyType] as KeyringPair['type']) ||
-      defaults.attKeyType
+        defaults.attKeyType
   if (attKeyMnemonic !== undefined) {
     return Kilt.generateKeypair({ seed: attKeyMnemonic, type: attKeyType })
   } else {
@@ -182,7 +170,7 @@ export function generateDelegationKey(): MultibaseKeyPair | undefined {
     delKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.delKeyType] as KeyringPair['type']) ||
-      defaults.delKeyType
+        defaults.delKeyType
   if (delKeyMnemonic !== undefined) {
     return Kilt.generateKeypair({ seed: delKeyMnemonic, type: delKeyType })
   } else {
@@ -213,7 +201,7 @@ export function generateNewAuthenticationKey(): MultibaseKeyPair | undefined {
     authKeyMnemonic === undefined
       ? undefined
       : (process.env[envNames.newAuthKeyType] as KeyringPair['type']) ||
-      defaults.authKeyType
+        defaults.authKeyType
   if (authKeyMnemonic !== undefined) {
     return Kilt.generateKeypair({ seed: authKeyMnemonic, type: authKeyType })
   } else {
@@ -221,11 +209,11 @@ export function generateNewAuthenticationKey(): MultibaseKeyPair | undefined {
   }
 }
 
-const validValues: Set<SignatureVerificationRelationship> = new Set([
+const validValues = new Set([
   'authentication',
   'assertionMethod',
   'capabilityDelegation',
-])
+]) as Set<SignatureVerificationRelationship>
 export function parseVerificationMethod(): SignatureVerificationRelationship {
   const verificationMethod = process.env[envNames.verificationMethod]
   if (verificationMethod === undefined) {
@@ -246,21 +234,19 @@ export async function generateSiblingDipTx(
   relayApi: ApiPromise,
   providerApi: ApiPromise,
   consumerApi: ApiPromise,
-  did: DidUrl,
+  did: DidIdentifier,
   call: Call,
   submitterAccount: KeyringPair['address'],
-  keyId: VerificationMethod['id'],
-  didKeyRelationship: VerificationRelationship,
+  keyId: `#0x${string}`,
   includeWeb3Name: boolean,
   version: number,
-  sign: SignExtrinsicCallback
-): Promise<Kilt.SubmittableExtrinsic> {
+  sign: SignerInterface
+): Promise<SubmittableExtrinsic> {
   const signature = await generateDipTxSignature(
     consumerApi,
     did,
     call,
     submitterAccount,
-    didKeyRelationship,
     sign
   )
 
@@ -312,9 +298,7 @@ export async function generateSiblingDipTx(
     previousBlockHash
   )
   console.log(
-    `DIP proof v${version} generated for the DID key ${keyId.substring(
-      1
-    )} (${didKeyRelationship}).`
+    `DIP proof v${version} generated for the DID key ${keyId.substring(1)}.`
   )
   const dipProof =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -364,7 +348,6 @@ export async function generateParentDipTx(
   call: Call,
   submitterAccount: KeyringPair['address'],
   keyId: `#0x${string}`,
-  didKeyRelationship: VerificationRelationship,
   includeWeb3Name: boolean,
   version: number,
   sign: SignerInterface
@@ -374,7 +357,6 @@ export async function generateParentDipTx(
     did,
     call,
     submitterAccount,
-    didKeyRelationship,
     sign
   )
 
@@ -435,9 +417,7 @@ export async function generateParentDipTx(
     previousBlockHash
   )
   console.log(
-    `DIP proof v${version} generated for the DID key ${keyId.substring(
-      1
-    )} (${didKeyRelationship}).`
+    `DIP proof v${version} generated for the DID key ${keyId.substring(1)}.`
   )
   const dipProof =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -488,7 +468,6 @@ async function generateDipTxSignature(
   did: DidIdentifier,
   call: Call,
   submitterAccount: KeyringPair['address'],
-  didKeyRelationship: VerificationRelationship,
   sign: SignerInterface
 ): Promise<[Did.EncodedSignature, BN]> {
   const isDipCapable = api.tx.dipConsumer.dispatchAs !== undefined
@@ -547,7 +526,7 @@ export function hexifyDipSignature(signature: Did.EncodedSignature) {
 
 export function computeDidKeyId(
   api: ApiPromise,
-  didKey: Base58BtcMultibaseString,
+  didKey: Base58BtcMultibaseString
 ): `#0x${string}` {
   const { publicKey, keyType } = Did.multibaseKeyToDidKey(didKey)
   const didEncodedKey = api.createType('DidDidDetailsDidPublicKey', {
