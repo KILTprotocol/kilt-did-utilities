@@ -17,7 +17,8 @@
     "fix": "yarn lint:fix && yarn style:fix"
   },
   "dependencies": {
-    "@kiltprotocol/sdk-js": "0.33.2-dip-2",
+    "@kiltprotocol/augment-api": "1.11210.0-rc",
+    "@kiltprotocol/sdk-js": "1.0.0-alpha.3",
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
